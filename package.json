@@ -1,0 +1,57 @@
+{
+  "name": "worker-typescript-template",
+  "version": "1.0.0",
+  "description": "Cloudflare worker TypeScript template",
+  "main": "dist/worker.js",
+  "scripts": {
+    "build": "webpack",
+    "format": "prettier --write  '*.{json,js,toml}' 'src/**/*.ts' 'test/**/*.ts'",
+    "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js,toml}' 'src/**/*.ts' 'test/**/*.ts'",
+    "test": "jest --config jestconfig.json --verbose"
+  },
+  "author": "author",
+  "license": "MIT",
+  "eslintConfig": {
+    "root": true,
+    "parserOptions": {
+      "ecmaVersion": 11,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "globals": {
+      "xhr_calls": true
+    },
+    "extends": [
+      "typescript",
+      "prettier"
+    ],
+    "rules": {
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-constant-condition": "off"
+    }
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^2.2.2",
+    "@types/jest": "^26.0.23",
+    "@types/service-worker-mock": "^2.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.16.1",
+    "@typescript-eslint/parser": "^4.16.1",
+    "edgerender-yatl": "0.0.8",
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-typescript": "^3.0.0",
+    "file-loader": "^6.2.0",
+    "jest": "^27.0.1",
+    "prettier": "^2.3.0",
+    "prettier-plugin-toml": "^0.3.1",
+    "sax-wasm": "^2.0.1",
+    "service-worker-mock": "^2.0.5",
+    "ts-jest": "^27.0.1",
+    "ts-loader": "^9.2.2",
+    "typescript": "^4.3.2",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0"
+  }
+}

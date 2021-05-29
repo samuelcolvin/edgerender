@@ -1,0 +1,14 @@
+name = "edgerender"
+type = "javascript"
+zone_id = ""
+account_id = "d6252a570c309c113744c9e11317e271"
+route = ""
+workers_dev = true
+kv_namespaces = [
+  { binding = "TEMPLATES", preview_id = "0cf9b2a00a9c40f8b1d01374df81c024", id = "f1979c2914f3455c9896806d3ba9afb0" }
+]
+
+[build]
+command = "yarn build"
+[build.upload]
+format = "service-worker"
