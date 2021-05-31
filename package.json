@@ -29,12 +29,14 @@
     ],
     "rules": {
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
       "no-constant-condition": "off"
     }
   },
   "dependencies": {
     "@cloudflare/workers-types": "^2.2.2",
     "@types/jest": "^26.0.23",
+    "@types/react": "^17.0.8",
     "@types/service-worker-mock": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
@@ -49,9 +51,9 @@
     "sax-wasm": "^2.0.1",
     "service-worker-mock": "^2.0.5",
     "ts-jest": "^27.0.1",
-    "ts-loader": "^8",
-    "typescript": "^3",
-    "webpack": "^4",
+    "ts-loader": "^9.2.2",
+    "typescript": "^4.3.2",
+    "webpack": "^5.38.1",
     "webpack-cli": "^4.7.0"
   }
 }

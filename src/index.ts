@@ -7,7 +7,7 @@ async function handle(event: FetchEvent): Promise<Response> {
   const {request} = event
 
   try {
-    return await route(event)
+    return await route(request)
   } catch (exc) {
     if (exc instanceof HttpError) {
       console.warn(exc.message)
