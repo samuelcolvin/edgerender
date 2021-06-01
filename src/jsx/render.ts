@@ -1,12 +1,13 @@
 import type * as CSS from 'csstype'
 import escapeHtml from 'escape-html'
 import {smart_typeof, SmartType} from './utils'
+import {RawHtml} from './index'
 
 export type Props = Record<string, any>
 export type Component = (props: Props) => JsxChunk | Promise<JsxChunk>
 export class Fragment {}
 export type ElementType = string | typeof Fragment | Component
-type ChildSingleType = string | boolean | number | JsxChunk
+type ChildSingleType = string | boolean | number | RawHtml | JsxChunk
 export type ChildType = ChildSingleType | ChildSingleType[]
 export type Key = string | number | null
 
@@ -81,19 +82,44 @@ export class JsxChunk {
 }
 
 function render_prop(name: string, value: any): string {
-  let attr_value: string | null
+  let attr_value: string | null = null
+  let quote = '"'
+
   if (name == 'styles') {
     attr_value = render_styles(value)
-  } else if (typeof value == 'string') {
-    attr_value = value
   } else {
-    attr_value = JSON.stringify(value)
+    switch (smart_typeof(value)) {
+      case SmartType.String:
+        attr_value = escapeHtml(value)
+        break
+      case SmartType.Boolean:
+        if (value === true) {
+          return ` ${get_tag_name(name)}`
+        } else {
+          attr_value = null
+        }
+        break
+      case SmartType.RawHtml:
+        attr_value = (value as RawHtml).html
+        quote = attr_value.indexOf('"') == -1 ? '"' : "'"
+        break
+      default:
+        attr_value = escapeHtml(JSON.stringify(value))
+    }
   }
   if (attr_value == null) {
     return ''
   } else {
-    // TODO are we double escaping styles here?
-    return ` ${name}="${escapeHtml(attr_value)}"`
+    return ` ${get_tag_name(name)}=${quote}${attr_value}${quote}`
+  }
+}
+
+function get_tag_name(name: string): string {
+  switch (name) {
+    case 'className':
+      return 'class'
+    default:
+      return name.toLowerCase()
   }
 }
 
@@ -105,6 +131,8 @@ async function render_child(child: ChildType): Promise<string> {
       return await (child as JsxChunk).render()
     case SmartType.Array:
       return await cat_array(child as ChildType[])
+    case SmartType.RawHtml:
+      return (child as RawHtml).html
     default:
       return JSON.stringify(child)
   }

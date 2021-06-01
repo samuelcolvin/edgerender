@@ -36,24 +36,24 @@ declare global {
       a: GenericHtmlElement
       abbr: GenericHtmlElement
       address: GenericHtmlElement
-      area: GenericHtmlElement
+      area: EmptyHtmlElement
       article: GenericHtmlElement
       aside: GenericHtmlElement
       audio: GenericHtmlElement
       b: GenericHtmlElement
-      base: GenericHtmlElement
+      base: EmptyHtmlElement
       bdi: GenericHtmlElement
       bdo: GenericHtmlElement
       big: GenericHtmlElement
       blockquote: GenericHtmlElement
       body: GenericHtmlElement
-      br: GenericHtmlElement
+      br: EmptyHtmlElement
       button: GenericHtmlElement
       canvas: GenericHtmlElement
       caption: GenericHtmlElement
       cite: GenericHtmlElement
       code: GenericHtmlElement
-      col: GenericHtmlElement
+      col: EmptyHtmlElement
       colgroup: GenericHtmlElement
       data: GenericHtmlElement
       datalist: GenericHtmlElement
@@ -66,7 +66,7 @@ declare global {
       dl: GenericHtmlElement
       dt: GenericHtmlElement
       em: GenericHtmlElement
-      embed: GenericHtmlElement
+      embed: EmptyHtmlElement
       fieldset: GenericHtmlElement
       figcaption: GenericHtmlElement
       figure: GenericHtmlElement
@@ -81,7 +81,7 @@ declare global {
       head: GenericHtmlElement
       header: GenericHtmlElement
       hgroup: GenericHtmlElement
-      hr: GenericHtmlElement
+      hr: EmptyHtmlElement
       html: GenericHtmlElement
       i: GenericHtmlElement
       iframe: GenericHtmlElement
@@ -93,7 +93,7 @@ declare global {
       label: GenericHtmlElement
       legend: GenericHtmlElement
       li: GenericHtmlElement
-      link: GenericHtmlElement
+      link: EmptyHtmlElement
       main: GenericHtmlElement
       map: GenericHtmlElement
       mark: GenericHtmlElement
@@ -110,7 +110,7 @@ declare global {
       option: GenericHtmlElement
       output: GenericHtmlElement
       p: GenericHtmlElement
-      param: GenericHtmlElement
+      param: EmptyHtmlElement
       picture: GenericHtmlElement
       pre: GenericHtmlElement
       progress: GenericHtmlElement
@@ -125,7 +125,7 @@ declare global {
       section: GenericHtmlElement
       select: GenericHtmlElement
       small: GenericHtmlElement
-      source: GenericHtmlElement
+      source: EmptyHtmlElement
       span: GenericHtmlElement
       strong: GenericHtmlElement
       style: GenericHtmlElement
@@ -143,13 +143,74 @@ declare global {
       time: GenericHtmlElement
       title: GenericHtmlElement
       tr: GenericHtmlElement
-      track: GenericHtmlElement
+      track: EmptyHtmlElement
       u: GenericHtmlElement
       ul: GenericHtmlElement
       var: GenericHtmlElement
       video: GenericHtmlElement
-      wbr: GenericHtmlElement
+      wbr: EmptyHtmlElement
       webview: GenericHtmlElement
+
+      // SVG
+      svg: GenericHtmlElement
+
+      animate: GenericHtmlElement
+      animateMotion: GenericHtmlElement
+      animateTransform: GenericHtmlElement
+      circle: GenericHtmlElement
+      clipPath: GenericHtmlElement
+      defs: GenericHtmlElement
+      desc: GenericHtmlElement
+      ellipse: GenericHtmlElement
+      feBlend: GenericHtmlElement
+      feColorMatrix: GenericHtmlElement
+      feComponentTransfer: GenericHtmlElement
+      feComposite: GenericHtmlElement
+      feConvolveMatrix: GenericHtmlElement
+      feDiffuseLighting: GenericHtmlElement
+      feDisplacementMap: GenericHtmlElement
+      feDistantLight: GenericHtmlElement
+      feDropShadow: GenericHtmlElement
+      feFlood: GenericHtmlElement
+      feFuncA: GenericHtmlElement
+      feFuncB: GenericHtmlElement
+      feFuncG: GenericHtmlElement
+      feFuncR: GenericHtmlElement
+      feGaussianBlur: GenericHtmlElement
+      feImage: GenericHtmlElement
+      feMerge: GenericHtmlElement
+      feMergeNode: GenericHtmlElement
+      feMorphology: GenericHtmlElement
+      feOffset: GenericHtmlElement
+      fePointLight: GenericHtmlElement
+      feSpecularLighting: GenericHtmlElement
+      feSpotLight: GenericHtmlElement
+      feTile: GenericHtmlElement
+      feTurbulence: GenericHtmlElement
+      filter: GenericHtmlElement
+      foreignObject: GenericHtmlElement
+      g: GenericHtmlElement
+      image: GenericHtmlElement
+      line: GenericHtmlElement
+      linearGradient: GenericHtmlElement
+      marker: GenericHtmlElement
+      mask: GenericHtmlElement
+      metadata: GenericHtmlElement
+      mpath: GenericHtmlElement
+      path: GenericHtmlElement
+      pattern: GenericHtmlElement
+      polygon: GenericHtmlElement
+      polyline: GenericHtmlElement
+      radialGradient: GenericHtmlElement
+      rect: GenericHtmlElement
+      stop: GenericHtmlElement
+      switch: GenericHtmlElement
+      symbol: GenericHtmlElement
+      text: GenericHtmlElement
+      textPath: GenericHtmlElement
+      tspan: GenericHtmlElement
+      use: GenericHtmlElement
+      view: GenericHtmlElement
     }
   }
 }
