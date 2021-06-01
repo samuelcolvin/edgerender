@@ -1,3 +1,4 @@
+import type * as CSS from 'csstype'
 import escapeHtml from 'escape-html'
 import {smart_typeof, SmartType} from './utils'
 
@@ -9,18 +10,35 @@ type ChildSingleType = string | boolean | number | JsxChunk
 export type ChildType = ChildSingleType | ChildSingleType[]
 export type Key = string | number | null
 
-export class JsxChunk {
-  private readonly el: ElementType
-  private readonly key: Key
-  private readonly all_props: Props
-  private readonly props: Props
-  private readonly children: ChildType[]
+const EmptyTags = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+])
 
-  constructor(el: ElementType, all_props: Props, key: Key = null) {
+export class JsxChunk {
+  readonly el: ElementType
+  readonly key: Key
+  readonly args: Props
+  readonly props: Props
+  readonly children: ChildType[]
+
+  constructor(el: ElementType, args: Props, key: Key = null) {
     this.el = el
     this.key = key
-    this.all_props = all_props
-    const {children, ...props} = all_props
+    this.args = args
+    const {children, ...props} = args
     this.props = props
     if (Array.isArray(children)) {
       this.children = children
@@ -38,64 +56,163 @@ export class JsxChunk {
       for (const [key, value] of Object.entries(this.props)) {
         attrs += render_prop(key, value)
       }
-      return `<${el}${attrs}>${await this.render_children()}</${el}>`
+      if (EmptyTags.has(el)) {
+        // TODO error if children exist?
+        return `<${el}${attrs}>`
+      } else {
+        return `<${el}${attrs}>${await this.render_children()}</${el}>`
+      }
     } else if (el == Fragment) {
       return await this.render_children()
     } else {
       const f = el as Component
-      const jsx_chunk: JsxChunk = await Promise.resolve(f(this.all_props))
+      const jsx_chunk: JsxChunk = await Promise.resolve(f(this.args))
       return await jsx_chunk.render()
     }
   }
 
   private async render_children(): Promise<string> {
-    let result = ''
-    for (const child of this.children) {
-      result += await render_child(child)
-    }
-    return result
+    return await cat_array(this.children)
   }
 
   toString() {
-    return `JsxElement<${this.el} (${JSON.stringify(this.props)})>`
-  }
-
-  // TODO remove
-  toJSON() {
-    return {
-      el: this.el.toString(),
-      key: this.key,
-      props: this.props,
-      children: this.children,
-    }
+    return `JsxElement<${this.el} (${JSON.stringify(this.args)})>`
   }
 }
 
-export function render_prop(name: string, value: any): string {
-  let str_value = ''
-  if (typeof value == 'string') {
-    str_value = value
+function render_prop(name: string, value: any): string {
+  let attr_value: string | null
+  if (name == 'styles') {
+    attr_value = render_styles(value)
+  } else if (typeof value == 'string') {
+    attr_value = value
   } else {
-    // TODO styles etc
-    str_value = JSON.stringify(value)
+    attr_value = JSON.stringify(value)
   }
-  return ` ${name}="${escapeHtml(str_value)}"`
+  if (attr_value == null) {
+    return ''
+  } else {
+    // TODO are we double escaping styles here?
+    return ` ${name}="${escapeHtml(attr_value)}"`
+  }
 }
 
-export async function render_child(child: ChildType): Promise<string> {
-  const child_type = smart_typeof(child)
-  let result = ''
-  switch (child_type) {
+async function render_child(child: ChildType): Promise<string> {
+  switch (smart_typeof(child)) {
     case SmartType.String:
       return escapeHtml(child as string)
     case SmartType.JsxChunk:
       return await (child as JsxChunk).render()
     case SmartType.Array:
-      for (const item of child as any[]) {
-        result += await render_child(item)
-      }
-      return result
+      return await cat_array(child as ChildType[])
     default:
       return JSON.stringify(child)
   }
 }
+
+async function cat_array(child: ChildType[]): Promise<string> {
+  let result = ''
+  for (const item of child) {
+    result += await render_child(item)
+  }
+  return result
+}
+
+function render_styles(styles: CSS.Properties): string | null {
+  let serialized = ''
+  let delimiter = ''
+  for (const [name, value] of Object.entries(styles)) {
+    const is_custom_property = name.indexOf('--') == 0
+    if (value != null) {
+      serialized +=
+        delimiter +
+        (is_custom_property ? name : get_style_name(name)) +
+        ':' +
+        get_style_value(name, value, is_custom_property) +
+        ';'
+
+      delimiter = ';'
+    }
+  }
+  return serialized || null
+}
+
+const uppercase_pattern = /([A-Z])/g
+const ms_pattern = /^ms-/
+const style_name_cache: Record<string, string> = {}
+
+function get_style_name(name: string): string {
+  // from https://github.com/facebook/react/blob/master/packages/react-dom/src/server/ReactPartialRenderer.js
+  // (processStyleName) and
+  // https://github.com/facebook/react/blob/master/packages/react-dom/src/shared/hyphenateStyleName.js
+  const cached_value = style_name_cache[name] as string | undefined
+  if (typeof cached_value == 'string') {
+    return cached_value
+  } else {
+    return (style_name_cache[name] = name.replace(uppercase_pattern, '-$1').toLowerCase().replace(ms_pattern, '-ms-'))
+  }
+}
+
+function get_style_value(name: string, value: string | number | null | boolean, is_custom_property: boolean): string {
+  // from https://github.com/facebook/react/blob/master/packages/react-dom/src/shared/dangerousStyleValue.js
+
+  const is_empty = value == null || typeof value === 'boolean' || value === ''
+  if (is_empty) {
+    return ''
+  }
+
+  if (!is_custom_property && typeof value === 'number' && value !== 0 && !unitless_numbers.has(name)) {
+    // Presumes implicit 'px' suffix for unitless numbers
+    return value + 'px'
+  }
+
+  return ('' + value).trim()
+}
+
+const unitless_numbers = new Set([
+  'animationIterationCount',
+  'aspectRatio',
+  'borderImageOutset',
+  'borderImageSlice',
+  'borderImageWidth',
+  'boxFlex',
+  'boxFlexGroup',
+  'boxOrdinalGroup',
+  'columnCount',
+  'columns',
+  'flex',
+  'flexGrow',
+  'flexPositive',
+  'flexShrink',
+  'flexNegative',
+  'flexOrder',
+  'gridArea',
+  'gridRow',
+  'gridRowEnd',
+  'gridRowSpan',
+  'gridRowStart',
+  'gridColumn',
+  'gridColumnEnd',
+  'gridColumnSpan',
+  'gridColumnStart',
+  'fontWeight',
+  'lineClamp',
+  'lineHeight',
+  'opacity',
+  'order',
+  'orphans',
+  'tabSize',
+  'widows',
+  'zIndex',
+  'zoom',
+
+  // SVG-related properties
+  'fillOpacity',
+  'floodOpacity',
+  'stopOpacity',
+  'strokeDasharray',
+  'strokeDashoffset',
+  'strokeMiterlimit',
+  'strokeOpacity',
+  'strokeWidth',
+])

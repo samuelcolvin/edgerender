@@ -12,13 +12,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "esModuleInterop": true,
-    "types": [
-      "@cloudflare/workers-types",
-      "@types/jest",
-      "@types/service-worker-mock",
-      "@types/escape-html",
-      "./src/jsx"
-    ]
+    "types": ["@cloudflare/workers-types", "@types/jest", "@types/service-worker-mock", "@types/escape-html"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "test"]

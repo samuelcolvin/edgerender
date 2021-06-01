@@ -1,24 +1,15 @@
+import * as CSS from 'csstype'
+import {JsxChunk} from './render'
+
 export {}
 
 declare global {
   namespace JSX {
-    type Key = string | number
     type Props = Record<string, any>
-    type ElementTypes = Component | AnyHtmlElement
-    type ChildTypes = ElementTypes | string | number | boolean
-
-    interface JsxElement {
-      el: ElementTypes
-      props: Props
-      key?: Key
-      render: () => Promise<string>
-    }
-    type Element = JsxElement | Promise<JsxElement>
-
     type Component = (props: Props) => Element
-    // export class Fragment {}
+    type ChildTypes = Component | HtmlElement | string | number | boolean
 
-    // type Element = MyElement | Promise<MyElement>
+    type Element = JsxChunk | Promise<JsxChunk>
 
     interface ElementChildrenAttribute {
       children: unknown
@@ -27,18 +18,19 @@ declare global {
     interface GenericHtmlElement {
       className?: string
       id?: string
-      styles?: Record<string, string | number>
+      styles?: CSS.Properties
       children?: ChildTypes | ChildTypes[]
       [key: string]: any
     }
 
-    interface VoidHtmlElement {
+    interface EmptyHtmlElement {
       className?: string
       id?: string
-      styles?: Record<string, string | number>
+      styles?: CSS.Properties
+      children?: never
       [key: string]: any
     }
-    type AnyHtmlElement = GenericHtmlElement | VoidHtmlElement
+    type HtmlElement = GenericHtmlElement | EmptyHtmlElement
 
     interface IntrinsicElements {
       a: GenericHtmlElement
@@ -93,8 +85,8 @@ declare global {
       html: GenericHtmlElement
       i: GenericHtmlElement
       iframe: GenericHtmlElement
-      img: GenericHtmlElement
-      input: VoidHtmlElement
+      img: EmptyHtmlElement
+      input: EmptyHtmlElement
       ins: GenericHtmlElement
       kbd: GenericHtmlElement
       keygen: GenericHtmlElement
@@ -107,7 +99,7 @@ declare global {
       mark: GenericHtmlElement
       menu: GenericHtmlElement
       menuitem: GenericHtmlElement
-      meta: VoidHtmlElement
+      meta: EmptyHtmlElement
       meter: GenericHtmlElement
       nav: GenericHtmlElement
       noindex: GenericHtmlElement

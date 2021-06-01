@@ -1,6 +1,4 @@
-async function render_jsx(jsx_element: JSX.Element): Promise<string> {
-  return await (jsx_element as any).render()
-}
+import {render_jsx} from './jsx'
 
 const Foobar = ({thing}: {thing: number}) => <span className="whatever">Number: {thing}</span>
 
@@ -24,7 +22,7 @@ async function DoWait({x}: {x: number}) {
   )
 }
 
-const HasInner = ({children}: {children: JSX.AnyHtmlElement}) => {
+const HasInner = ({children}: {children: JSX.HtmlElement}) => {
   return <div className="this-takes-inner">{children}</div>
 }
 

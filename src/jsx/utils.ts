@@ -12,7 +12,6 @@ export enum SmartType {
   Promise = 'Promise',
   JsxChunk = 'JsxChunk',
   Fragment = 'Fragment',
-  AsyncRef = 'AsyncRef',
 }
 
 export const smart_typeof = (obj: any): SmartType => {
