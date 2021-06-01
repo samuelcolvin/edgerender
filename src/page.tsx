@@ -47,7 +47,7 @@ function foobar() {
   )
 }
 
-export default async () => {
+export default async (): Promise<string> => {
   const t = foobar()
   return await render_jsx(t)
 }
