@@ -1,7 +1,5 @@
-async function render_jsx(raw: any): Promise<string> {
-  // console.log('raw:', raw)
-  const prom = raw as Promise<string>
-  return await prom
+async function render_jsx(jsx_element: JSX.Element): Promise<string> {
+  return await (jsx_element as any).render()
 }
 
 const Foobar = ({thing}: {thing: number}) => <span className="whatever">Number: {thing}</span>
@@ -30,24 +28,28 @@ const HasInner = ({children}: {children: JSX.AnyHtmlElement}) => {
   return <div className="this-takes-inner">{children}</div>
 }
 
-// const Smash = ({x}: {x: number}) => <div>{x * 2}</div>
-
 function foobar() {
+  const x = '<b>this is html</b>'
+  const foobar = [1, 2, 3, 4]
   return (
     <div key="123" className="foobar">
       <Foobar thing={123} />
       hello
-      {/*<HasInner>*/}
-      {/*  <b>the kids</b>*/}
-      {/*</HasInner>*/}
+      <HasInner>
+        <b>the kids</b>
+      </HasInner>
       <DoWait x={50}/>
       <input type="text"/>
       <>whatever</>
-      {/*<Smash x={1}/>*/}
+      {x}
+      {foobar.map(v => (
+        <div>{v}</div>
+      ))}
     </div>
   )
 }
 
 export default async () => {
-  return await render_jsx(foobar())
+  const t = foobar()
+  return await render_jsx(t)
 }

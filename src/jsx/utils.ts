@@ -10,7 +10,7 @@ export enum SmartType {
   Object = 'Object',
   Function = 'Function',
   Promise = 'Promise',
-  JsxElement = 'JsxElement',
+  JsxChunk = 'JsxChunk',
   Fragment = 'Fragment',
   AsyncRef = 'AsyncRef',
 }

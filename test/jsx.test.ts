@@ -11,6 +11,6 @@ describe('page', () => {
 
   test('render_page', async () => {
     const result = await render_page()
-    console.log('result:', JSON.stringify(result, null, 2))
+    console.log('result:', result)
   })
 })

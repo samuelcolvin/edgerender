@@ -1,20 +1,19 @@
-type Key = string | number
-type Props = Record<string, any>
-
-interface JsxElement<T> {
-  el: T
-  props: Props
-  key?: Key
-}
-// type Element = MyElement | Promise<MyElement>
-
 export {}
 
 declare global {
   namespace JSX {
+    type Key = string | number
+    type Props = Record<string, any>
     type ElementTypes = Component | AnyHtmlElement
     type ChildTypes = ElementTypes | string | number | boolean
-    type Element = JsxElement<ElementTypes> | Promise<JsxElement<ElementTypes>>
+
+    interface JsxElement {
+      el: ElementTypes
+      props: Props
+      key?: Key
+      render: () => Promise<string>
+    }
+    type Element = JsxElement | Promise<JsxElement>
 
     type Component = (props: Props) => Element
     // export class Fragment {}
