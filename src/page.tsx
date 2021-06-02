@@ -1,7 +1,7 @@
 import {render_jsx, raw_html} from './jsx'
 import main_styles from './styles/main.scss'
 import icon from './icons/icon.svg'
-import './icons/favicon.ico'
+import script_src from '!raw-loader!./raw_javascript.js'
 
 const MoonSvg = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -28,27 +28,6 @@ const GitHubSvg = () => (
     1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/>
   </svg>
 )
-
-const script_src = `
-function set_theme(dark) {
-  if (dark) {
-    document.body.classList.add('dark')
-  } else {
-    document.body.classList.remove('dark')
-  }
-  localStorage.dark = JSON.stringify(dark)
-}
-
-if (localStorage.dark) {
-  set_theme(JSON.parse(localStorage.dark))
-} else {
-  set_theme(matchMedia('(prefers-color-scheme: dark)').matches)
-}
-
-document.getElementById('slider').onclick = () => {
-  set_theme(!document.body.classList.contains('dark'))
-}
-`
 
 async function MainPage() {
   const readme = 'this is the readme'

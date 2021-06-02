@@ -6,7 +6,7 @@ module.exports = {
     filename: 'worker.js',
     path: path.join(__dirname, 'dist'),
     publicPath: '/',
-    assetModuleFilename: 'assets/[name][ext][query]',
+    assetModuleFilename: '/assets/[name][ext][query]',
   },
   devtool: 'cheap-module-source-map',
   mode: 'development',
