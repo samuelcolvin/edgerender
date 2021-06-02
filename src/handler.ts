@@ -1,6 +1,7 @@
 import mime from 'mime/lite'
 import {main, clicked} from './page'
 import {HttpError} from './utils'
+import favicon_path from './icons/favicon.ico'
 
 export async function route(request: Request): Promise<Response> {
   const url = new URL(request.url)
@@ -9,18 +10,21 @@ export async function route(request: Request): Promise<Response> {
   console.log('htmx request:', request.headers.get('hx-request') == 'true')
   if (pathname == '/') {
     const html = await main()
-    return new Response(html, {headers: content_headers(url, 'main.html')})
+    return new Response(html, {headers: content_headers(pathname, 'main.html')})
   } else if (pathname == '/clicked/') {
     const html = await clicked()
-    return new Response(html, {headers: content_headers(url, 'main.html')})
+    return new Response(html, {headers: content_headers(pathname, 'main.html')})
   }
 
   if (pathname.startsWith('/assets/')) {
-    return await static_content(request, url)
+    return await static_content(request, pathname)
   }
 
   if (pathname.startsWith('/fonts/')) {
     return await fetch(`https://smokeshow.helpmanual.io${pathname}`, request)
+  }
+  if (pathname == '/favicon.ico') {
+    return await static_content(request, favicon_path)
   }
   throw new HttpError(404, 'Page Not Found')
 }
@@ -33,14 +37,10 @@ declare const __STATIC_CONTENT: KVNamespace
 // __STATIC_CONTENT_MANIFEST is a JSON generate by the "site" mode of wrangler
 const static_manifest: Record<string, string> = JSON.parse(__STATIC_CONTENT_MANIFEST)
 
-async function static_content(request: Request, url: URL): Promise<Response> {
-  // const redirect_response = redirect(url)
-  // if (redirect_response) {
-  //   return redirect_response
-  // }
+async function static_content(request: Request, pathname: string): Promise<Response> {
 
   // stripe leading slashes and "assets to match the format in static_manifest
-  const clean_path = url.pathname.replace(/^\/assets\//, '')
+  const clean_path = pathname.replace(/^\/assets\//, '')
 
   const content_key = static_manifest[clean_path]
   if (content_key) {
@@ -54,11 +54,11 @@ async function static_content(request: Request, url: URL): Promise<Response> {
   if (content === null) {
     throw new HttpError(404, `content not found for key "${content_key}"`)
   } else {
-    return new Response(content, {headers: content_headers(url, content_key)})
+    return new Response(content, {headers: content_headers(pathname, content_key)})
   }
 }
 
-function content_headers(url: URL, content_key: string): Record<string, string> {
+function content_headers(pathname: string, content_key: string): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': get_mime_type(content_key),
     'X-Frame-Options': 'DENY',
@@ -71,10 +71,10 @@ function content_headers(url: URL, content_key: string): Record<string, string> 
   // if (csp_rules) {
   //   headers['Content-Security-Policy'] = csp_rules
   // }
-  if (url.pathname.startsWith('/assets/')) {
+  if (pathname.startsWith('/assets/')) {
     headers['Cache-Control'] = 'public, max-age=86400'
   }
-  if (url.pathname.startsWith('/favicons/')) {
+  if (pathname.startsWith('/favicons/')) {
     headers['Cache-Control'] = 'public, max-age=31536000'
   }
 

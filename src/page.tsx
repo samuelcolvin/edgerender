@@ -1,5 +1,7 @@
 import {render_jsx, raw_html} from './jsx'
 import main_styles from './styles/main.scss'
+import icon from './icons/icon.svg'
+import './icons/favicon.ico'
 
 const MoonSvg = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -99,6 +101,11 @@ async function MainPage() {
             <button hxDelete="/account" hxPrompt="Enter your account name to confirm deletion">
               Delete My Account
             </button>
+            <p align="center">
+              <a href="https://smokeshow.helpmanual.io">
+                <img src={icon} alt="smokeshow" width="200" height="200"/>
+              </a>
+            </p>
           </article>
         </main>
       </body>

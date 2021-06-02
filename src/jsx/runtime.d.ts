@@ -83,7 +83,7 @@ declare global {
       hxPatch?: string
       hxDelete?: string
 
-      hxSwap?: 'innerHTML'| 'outerHTML'| 'afterbegin'| 'beforebegin'| 'beforeend'| 'afterend'
+      hxSwap?: 'innerHTML' | 'outerHTML' | 'afterbegin' | 'beforebegin' | 'beforeend' | 'afterend'
       hxSwapOob?: boolean
       hxTarget?: string
       hxTrigger?: string

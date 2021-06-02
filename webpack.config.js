@@ -1,17 +1,19 @@
 const path = require('path')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 
 module.exports = {
   output: {
     filename: 'worker.js',
     path: path.join(__dirname, 'dist'),
     publicPath: '/',
-    assetModuleFilename: 'assets/[name].[hash][ext][query]',
+    assetModuleFilename: 'assets/[name][ext][query]',
   },
   devtool: 'cheap-module-source-map',
   mode: 'development',
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.scss', '.sass'],
   },
+  plugins: [new CleanWebpackPlugin()],
   module: {
     rules: [
       {
@@ -25,7 +27,7 @@ module.exports = {
         test: /\.s[ac]ss$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/[name].[hash].css[query]',
+          filename: 'assets/[name].css[query]',
         },
         use: [
           {
@@ -37,6 +39,10 @@ module.exports = {
             },
           },
         ],
+      },
+      {
+        test: /\.(css|png|ico|jpe?g|svg|woff2?|ttf)$/i,
+        type: 'asset/resource',
       },
     ],
   },

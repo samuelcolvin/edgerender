@@ -23,7 +23,7 @@ const uppercase_pattern = /([A-Z])/g
 const ms_pattern = /^ms-/
 const style_name_cache: Record<string, string> = {}
 
-export const hyphenate = (name: string): string =>  name.replace(uppercase_pattern, '-$1').toLowerCase()
+export const hyphenate = (name: string): string => name.replace(uppercase_pattern, '-$1').toLowerCase()
 
 function get_style_name(name: string): string {
   // from https://github.com/facebook/react/blob/master/packages/react-dom/src/server/ReactPartialRenderer.js
