@@ -10,6 +10,7 @@ export type ElementType = string | typeof Fragment | Component
 type ChildSingleType = string | boolean | number | RawHtml | JsxChunk
 export type ChildType = ChildSingleType | ChildSingleType[]
 export type Key = string | number | null
+export type classNameType = string | (string | boolean | null | undefined)[] | Record<string, any>
 
 const EmptyTags = new Set([
   'area',
@@ -94,8 +95,10 @@ function render_attr(name: string, value: any): string {
   let attr_value: string | null = null
   let quote = '"'
 
-  if (name == 'styles') {
+  if (name == 'style') {
     attr_value = render_styles(value)
+  } else if (name == 'className') {
+    attr_value = render_class(value)
   } else {
     switch (smart_typeof(value)) {
       case SmartType.String:
@@ -154,4 +157,30 @@ async function render_child(child: ChildType): Promise<string> {
 async function cat_array(child: ChildType[]): Promise<string> {
   const results = await Promise.all(child.map(item => render_child(item)))
   return results.join('')
+}
+
+function render_class(value: classNameType): string {
+  const classNames: string[] = []
+  const value_type = smart_typeof(value)
+  switch (value_type) {
+    case SmartType.String:
+      return value as string
+    case SmartType.Array:
+      for (const className of value as any[]) {
+        if (typeof className == 'string') {
+          classNames.push(className)
+        }
+      }
+      break
+    case SmartType.Object:
+      for (const [className, v] of Object.entries(value as Record<string, any>)) {
+        if (v) {
+          classNames.push(className)
+        }
+      }
+      break
+    default:
+      throw new TypeError(`unexpected type passed to className: "${value_type}", should be string, list or object`)
+  }
+  return classNames.join(' ')
 }

@@ -69,7 +69,7 @@ async function MainPage() {
         <link rel="preload" href={main_styles} as="style" crossOrigin="anonymous"/>
         <link rel="stylesheet" href={main_styles} crossOrigin="anonymous"/>
 
-       <script src="https://unpkg.com/htmx.org@1.4.1"/>
+       <script src="https://unpkg.com/htmx.org@1.4.1" crossOrigin="anonymous"/>
       </head>
       <body>
         <main>
@@ -84,8 +84,8 @@ async function MainPage() {
               {raw_html(script_src)}
             </script>
           </nav>
-          <article>
-            <header>
+          <article className={['foo', false, 'bar', true]}>
+            <header className={{spam: true, fish: null, another: undefined, snap: 'ok'}}>
               <div className="weight-medium">README.md</div>
               <a href="https://github.com/samuelcolvin/smokeshow">
                 <GitHubSvg/>

@@ -1,5 +1,5 @@
 import * as CSS from 'csstype'
-import {JsxChunk} from './render'
+import {JsxChunk, classNameType} from './render'
 
 export {}
 
@@ -18,7 +18,7 @@ declare global {
     interface BasicHtmlElement {
       // Standard HTML Attributes
       accessKey?: string
-      className?: string
+      className?: classNameType
       contentEditable?: boolean | 'inherit'
       contextMenu?: string
       dir?: string
