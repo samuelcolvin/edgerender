@@ -3,19 +3,54 @@ import {JsxChunk, classNameType} from './render'
 
 export {}
 
+type AttributeReferrerPolicy =
+  | ''
+  | 'no-referrer'
+  | 'no-referrer-when-downgrade'
+  | 'origin'
+  | 'origin-when-cross-origin'
+  | 'same-origin'
+  | 'strict-origin'
+  | 'strict-origin-when-cross-origin'
+  | 'unsafe-url'
+
+type InputType =
+  | 'button'
+  | 'checkbox'
+  | 'color'
+  | 'date'
+  | 'datetime'
+  | 'email'
+  | 'file'
+  | 'hidden'
+  | 'image'
+  | 'month'
+  | 'number'
+  | 'password'
+  | 'radio'
+  | 'range'
+  | 'reset'
+  | 'search'
+  | 'submit'
+  | 'tel'
+  | 'text'
+  | 'time'
+  | 'url'
+  | 'week'
+
 declare global {
   namespace JSX {
     type Props = Record<string, any>
     type Component = (props: Props) => Element
-    type ChildTypes = Component | HtmlElement | string | number | boolean
+    type ChildTypes = Component | HtmlTag | string | number | boolean
 
     type Element = JsxChunk | Promise<JsxChunk>
 
-    interface ElementChildrenAttribute {
+    interface TagChildrenAttribute {
       children: unknown
     }
 
-    interface BasicHtmlElement {
+    interface BaseTag {
       // Standard HTML Attributes
       accessKey?: string
       className?: classNameType
@@ -66,13 +101,13 @@ declare global {
 
       // Living Standard
       /**
-       * Hints at the type of data that might be entered by the user while editing the element or its contents
+       * Hints at the type of data that might be entered by the user while editing the Tag or its contents
        * @see https://html.spec.whatwg.org/multipage/interaction.html#input-modalities:-the-inputmode-attribute
        */
       inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'
       /**
-       * Specify that a standard HTML element should behave like a defined custom built-in element
-       * @see https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is
+       * Specify that a standard HTML Tag should behave like a defined custom built-in Tag
+       * @see https://html.spec.whatwg.org/multipage/custom-Tags.html#attr-is
        */
       is?: string
 
@@ -91,19 +126,35 @@ declare global {
       hxBoost?: boolean
       hxPushUrl?: 'true'
       hxPrompt?: string
+      hxIndicator?: string
     }
 
-    interface GenericHtmlElement extends BasicHtmlElement {
+    interface GenericTag extends BaseTag {
       children?: ChildTypes | ChildTypes[]
       [key: string]: any
     }
 
-    interface EmptyHtmlElement extends BasicHtmlElement {
+    // html tag with no children e.g. used like <foo .../> not <foo...>...</foo>
+    interface EmptyTag extends BaseTag {
       children?: never
       [key: string]: any
     }
 
-    interface ButtonHtmlElement extends BasicHtmlElement {
+    interface AnchorTag extends BaseTag {
+      download?: any
+      href?: string
+      hrefLang?: string
+      media?: string
+      ping?: string
+      rel?: string
+      target?: string
+      type?: string
+      referrerPolicy?: AttributeReferrerPolicy
+
+      children?: ChildTypes | ChildTypes[]
+    }
+
+    interface ButtonTag extends BaseTag {
       autoFocus?: boolean
       disabled?: boolean
       form?: string
@@ -119,187 +170,321 @@ declare global {
       children?: ChildTypes | ChildTypes[]
     }
 
-    type HtmlElement = GenericHtmlElement | EmptyHtmlElement | ButtonHtmlElement
+    interface FormTag extends BaseTag {
+      acceptCharset?: string
+      action?: string
+      autoComplete?: string
+      encType?: string
+      method?: string
+      name?: string
+      noValidate?: boolean
+      target?: string
+
+      children?: ChildTypes | ChildTypes[]
+    }
+
+    interface HtmlHtmlTag extends BaseTag {
+      manifest?: string
+
+      children?: ChildTypes | ChildTypes[]
+    }
+
+    interface IframeTag extends BaseTag {
+      allow?: string
+      allowFullScreen?: boolean
+      allowTransparency?: boolean
+      /** @deprecated */
+      frameBorder?: number | string
+      height?: number | string
+      loading?: 'eager' | 'lazy'
+      /** @deprecated */
+      marginHeight?: number
+      /** @deprecated */
+      marginWidth?: number
+      name?: string
+      referrerPolicy?: AttributeReferrerPolicy
+      sandbox?: string
+      /** @deprecated */
+      scrolling?: string
+      seamless?: boolean
+      src?: string
+      srcDoc?: string
+      width?: number | string
+
+      children?: ChildTypes | ChildTypes[]
+    }
+
+    interface ImageTag extends BaseTag {
+      alt?: string
+      crossOrigin?: 'anonymous' | 'use-credentials' | ''
+      decoding?: 'async' | 'auto' | 'sync'
+      height?: number | string
+      loading?: 'eager' | 'lazy'
+      referrerPolicy?: AttributeReferrerPolicy
+      sizes?: string
+      src?: string
+      srcSet?: string
+      useMap?: string
+      width?: number | string
+    }
+
+    interface InputTag extends BaseTag {
+      accept?: string
+      alt?: string
+      autoComplete?: string
+      autoFocus?: boolean
+      capture?: boolean | string // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
+      checked?: boolean
+      dirname?: string
+      disabled?: boolean
+      enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'
+      form?: string
+      formAction?: string
+      formEncType?: string
+      formMethod?: string
+      formNoValidate?: boolean
+      formTarget?: string
+      height?: number | string
+      list?: string
+      max?: number | string
+      maxLength?: number
+      min?: number | string
+      minLength?: number
+      multiple?: boolean
+      name?: string
+      pattern?: string
+      placeholder?: string
+      readOnly?: boolean
+      required?: boolean
+      size?: number
+      src?: string
+      step?: number | string
+      type?: InputType
+      value?: string | ReadonlyArray<string> | number
+      width?: number | string
+    }
+
+    interface LabelTag extends BaseTag {
+      form?: string
+      htmlFor?: string
+
+      children?: ChildTypes | ChildTypes[]
+    }
+
+    interface LinkTag extends BaseTag {
+      as?: string
+      crossOrigin?: string
+      href?: string
+      hrefLang?: string
+      integrity?: string
+      media?: string
+      referrerPolicy?: AttributeReferrerPolicy
+      rel?: string
+      sizes?: string
+      type?: string
+      charSet?: string
+    }
+
+    interface MetaTag extends BaseTag {
+      charSet?: string
+      content?: string
+      httpEquiv?: string
+      name?: string
+    }
+
+    type HtmlTag =
+      | GenericTag
+      | EmptyTag
+      | AnchorTag
+      | ButtonTag
+      | FormTag
+      | HtmlHtmlTag
+      | IframeTag
+      | ImageTag
+      | InputTag
+      | LabelTag
+      | LinkTag
+      | MetaTag
 
     interface IntrinsicElements {
-      a: GenericHtmlElement
-      abbr: GenericHtmlElement
-      address: GenericHtmlElement
-      area: EmptyHtmlElement
-      article: GenericHtmlElement
-      aside: GenericHtmlElement
-      audio: GenericHtmlElement
-      b: GenericHtmlElement
-      base: EmptyHtmlElement
-      bdi: GenericHtmlElement
-      bdo: GenericHtmlElement
-      big: GenericHtmlElement
-      blockquote: GenericHtmlElement
-      body: GenericHtmlElement
-      br: EmptyHtmlElement
-      button: ButtonHtmlElement
-      canvas: GenericHtmlElement
-      caption: GenericHtmlElement
-      cite: GenericHtmlElement
-      code: GenericHtmlElement
-      col: EmptyHtmlElement
-      colgroup: GenericHtmlElement
-      data: GenericHtmlElement
-      datalist: GenericHtmlElement
-      dd: GenericHtmlElement
-      del: GenericHtmlElement
-      details: GenericHtmlElement
-      dfn: GenericHtmlElement
-      dialog: GenericHtmlElement
-      div: GenericHtmlElement
-      dl: GenericHtmlElement
-      dt: GenericHtmlElement
-      em: GenericHtmlElement
-      embed: EmptyHtmlElement
-      fieldset: GenericHtmlElement
-      figcaption: GenericHtmlElement
-      figure: GenericHtmlElement
-      footer: GenericHtmlElement
-      form: GenericHtmlElement
-      h1: GenericHtmlElement
-      h2: GenericHtmlElement
-      h3: GenericHtmlElement
-      h4: GenericHtmlElement
-      h5: GenericHtmlElement
-      h6: GenericHtmlElement
-      head: GenericHtmlElement
-      header: GenericHtmlElement
-      hgroup: GenericHtmlElement
-      hr: EmptyHtmlElement
-      html: GenericHtmlElement
-      i: GenericHtmlElement
-      iframe: GenericHtmlElement
-      img: EmptyHtmlElement
-      input: EmptyHtmlElement
-      ins: GenericHtmlElement
-      kbd: GenericHtmlElement
-      keygen: GenericHtmlElement
-      label: GenericHtmlElement
-      legend: GenericHtmlElement
-      li: GenericHtmlElement
-      link: EmptyHtmlElement
-      main: GenericHtmlElement
-      map: GenericHtmlElement
-      mark: GenericHtmlElement
-      menu: GenericHtmlElement
-      menuitem: GenericHtmlElement
-      meta: EmptyHtmlElement
-      meter: GenericHtmlElement
-      nav: GenericHtmlElement
-      noindex: GenericHtmlElement
-      noscript: GenericHtmlElement
-      object: GenericHtmlElement
-      ol: GenericHtmlElement
-      optgroup: GenericHtmlElement
-      option: GenericHtmlElement
-      output: GenericHtmlElement
-      p: GenericHtmlElement
-      param: EmptyHtmlElement
-      picture: GenericHtmlElement
-      pre: GenericHtmlElement
-      progress: GenericHtmlElement
-      q: GenericHtmlElement
-      rp: GenericHtmlElement
-      rt: GenericHtmlElement
-      ruby: GenericHtmlElement
-      s: GenericHtmlElement
-      samp: GenericHtmlElement
-      slot: GenericHtmlElement
-      script: GenericHtmlElement
-      section: GenericHtmlElement
-      select: GenericHtmlElement
-      small: GenericHtmlElement
-      source: EmptyHtmlElement
-      span: GenericHtmlElement
-      strong: GenericHtmlElement
-      style: GenericHtmlElement
-      sub: GenericHtmlElement
-      summary: GenericHtmlElement
-      sup: GenericHtmlElement
-      table: GenericHtmlElement
-      template: GenericHtmlElement
-      tbody: GenericHtmlElement
-      td: GenericHtmlElement
-      textarea: GenericHtmlElement
-      tfoot: GenericHtmlElement
-      th: GenericHtmlElement
-      thead: GenericHtmlElement
-      time: GenericHtmlElement
-      title: GenericHtmlElement
-      tr: GenericHtmlElement
-      track: EmptyHtmlElement
-      u: GenericHtmlElement
-      ul: GenericHtmlElement
-      var: GenericHtmlElement
-      video: GenericHtmlElement
-      wbr: EmptyHtmlElement
-      webview: GenericHtmlElement
+      a: AnchorTag
+      abbr: GenericTag
+      address: GenericTag
+      area: EmptyTag
+      article: GenericTag
+      aside: GenericTag
+      audio: GenericTag
+      b: GenericTag
+      base: EmptyTag
+      bdi: GenericTag
+      bdo: GenericTag
+      big: GenericTag
+      blockquote: GenericTag
+      body: GenericTag
+      br: EmptyTag
+      button: ButtonTag
+      canvas: GenericTag
+      caption: GenericTag
+      cite: GenericTag
+      code: GenericTag
+      col: EmptyTag
+      colgroup: GenericTag
+      data: GenericTag
+      datalist: GenericTag
+      dd: GenericTag
+      del: GenericTag
+      details: GenericTag
+      dfn: GenericTag
+      dialog: GenericTag
+      div: GenericTag
+      dl: GenericTag
+      dt: GenericTag
+      em: GenericTag
+      embed: EmptyTag
+      fieldset: GenericTag
+      figcaption: GenericTag
+      figure: GenericTag
+      footer: GenericTag
+      form: FormTag
+      h1: GenericTag
+      h2: GenericTag
+      h3: GenericTag
+      h4: GenericTag
+      h5: GenericTag
+      h6: GenericTag
+      head: GenericTag
+      header: GenericTag
+      hgroup: GenericTag
+      hr: EmptyTag
+      html: HtmlHtmlTag
+      i: GenericTag
+      iframe: IframeTag
+      img: ImageTag
+      input: InputTag
+      ins: GenericTag
+      kbd: GenericTag
+      keygen: GenericTag
+      label: LabelTag
+      legend: GenericTag
+      li: GenericTag
+      link: LinkTag
+      main: GenericTag
+      map: GenericTag
+      mark: GenericTag
+      menu: GenericTag
+      menuitem: GenericTag
+      meta: MetaTag
+      meter: GenericTag
+      nav: GenericTag
+      noindex: GenericTag
+      noscript: GenericTag
+      object: GenericTag
+      ol: GenericTag
+      optgroup: GenericTag
+      option: GenericTag
+      output: GenericTag
+      p: GenericTag
+      param: EmptyTag
+      picture: GenericTag
+      pre: GenericTag
+      progress: GenericTag
+      q: GenericTag
+      rp: GenericTag
+      rt: GenericTag
+      ruby: GenericTag
+      s: GenericTag
+      samp: GenericTag
+      slot: GenericTag
+      script: GenericTag
+      section: GenericTag
+      select: GenericTag
+      small: GenericTag
+      source: EmptyTag
+      span: GenericTag
+      strong: GenericTag
+      style: GenericTag
+      sub: GenericTag
+      summary: GenericTag
+      sup: GenericTag
+      table: GenericTag
+      template: GenericTag
+      tbody: GenericTag
+      td: GenericTag
+      textarea: GenericTag
+      tfoot: GenericTag
+      th: GenericTag
+      thead: GenericTag
+      time: GenericTag
+      title: GenericTag
+      tr: GenericTag
+      track: EmptyTag
+      u: GenericTag
+      ul: GenericTag
+      var: GenericTag
+      video: GenericTag
+      wbr: EmptyTag
+      webview: GenericTag
 
       // SVG
-      svg: GenericHtmlElement
+      svg: GenericTag
 
-      animate: GenericHtmlElement
-      animateMotion: GenericHtmlElement
-      animateTransform: GenericHtmlElement
-      circle: GenericHtmlElement
-      clipPath: GenericHtmlElement
-      defs: GenericHtmlElement
-      desc: GenericHtmlElement
-      ellipse: GenericHtmlElement
-      feBlend: GenericHtmlElement
-      feColorMatrix: GenericHtmlElement
-      feComponentTransfer: GenericHtmlElement
-      feComposite: GenericHtmlElement
-      feConvolveMatrix: GenericHtmlElement
-      feDiffuseLighting: GenericHtmlElement
-      feDisplacementMap: GenericHtmlElement
-      feDistantLight: GenericHtmlElement
-      feDropShadow: GenericHtmlElement
-      feFlood: GenericHtmlElement
-      feFuncA: GenericHtmlElement
-      feFuncB: GenericHtmlElement
-      feFuncG: GenericHtmlElement
-      feFuncR: GenericHtmlElement
-      feGaussianBlur: GenericHtmlElement
-      feImage: GenericHtmlElement
-      feMerge: GenericHtmlElement
-      feMergeNode: GenericHtmlElement
-      feMorphology: GenericHtmlElement
-      feOffset: GenericHtmlElement
-      fePointLight: GenericHtmlElement
-      feSpecularLighting: GenericHtmlElement
-      feSpotLight: GenericHtmlElement
-      feTile: GenericHtmlElement
-      feTurbulence: GenericHtmlElement
-      filter: GenericHtmlElement
-      foreignObject: GenericHtmlElement
-      g: GenericHtmlElement
-      image: GenericHtmlElement
-      line: GenericHtmlElement
-      linearGradient: GenericHtmlElement
-      marker: GenericHtmlElement
-      mask: GenericHtmlElement
-      metadata: GenericHtmlElement
-      mpath: GenericHtmlElement
-      path: GenericHtmlElement
-      pattern: GenericHtmlElement
-      polygon: GenericHtmlElement
-      polyline: GenericHtmlElement
-      radialGradient: GenericHtmlElement
-      rect: GenericHtmlElement
-      stop: GenericHtmlElement
-      switch: GenericHtmlElement
-      symbol: GenericHtmlElement
-      text: GenericHtmlElement
-      textPath: GenericHtmlElement
-      tspan: GenericHtmlElement
-      use: GenericHtmlElement
-      view: GenericHtmlElement
+      animate: GenericTag
+      animateMotion: GenericTag
+      animateTransform: GenericTag
+      circle: GenericTag
+      clipPath: GenericTag
+      defs: GenericTag
+      desc: GenericTag
+      ellipse: GenericTag
+      feBlend: GenericTag
+      feColorMatrix: GenericTag
+      feComponentTransfer: GenericTag
+      feComposite: GenericTag
+      feConvolveMatrix: GenericTag
+      feDiffuseLighting: GenericTag
+      feDisplacementMap: GenericTag
+      feDistantLight: GenericTag
+      feDropShadow: GenericTag
+      feFlood: GenericTag
+      feFuncA: GenericTag
+      feFuncB: GenericTag
+      feFuncG: GenericTag
+      feFuncR: GenericTag
+      feGaussianBlur: GenericTag
+      feImage: GenericTag
+      feMerge: GenericTag
+      feMergeNode: GenericTag
+      feMorphology: GenericTag
+      feOffset: GenericTag
+      fePointLight: GenericTag
+      feSpecularLighting: GenericTag
+      feSpotLight: GenericTag
+      feTile: GenericTag
+      feTurbulence: GenericTag
+      filter: GenericTag
+      foreignObject: GenericTag
+      g: GenericTag
+      image: GenericTag
+      line: GenericTag
+      linearGradient: GenericTag
+      marker: GenericTag
+      mask: GenericTag
+      metadata: GenericTag
+      mpath: GenericTag
+      path: GenericTag
+      pattern: GenericTag
+      polygon: GenericTag
+      polyline: GenericTag
+      radialGradient: GenericTag
+      rect: GenericTag
+      stop: GenericTag
+      switch: GenericTag
+      symbol: GenericTag
+      text: GenericTag
+      textPath: GenericTag
+      tspan: GenericTag
+      use: GenericTag
+      view: GenericTag
     }
   }
 }

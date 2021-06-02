@@ -76,6 +76,7 @@ async function MainPage() {
             {readme}
             <button hxPost="/clicked/" hxSwap="outerHTML" hxPushUrl="true">
               Click Me
+              <span className="htmx-indicator">...</span>
             </button>
             <button hxDelete="/account" hxPrompt="Enter your account name to confirm deletion">
               Delete My Account

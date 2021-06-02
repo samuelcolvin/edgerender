@@ -38,7 +38,6 @@ declare const __STATIC_CONTENT: KVNamespace
 const static_manifest: Record<string, string> = JSON.parse(__STATIC_CONTENT_MANIFEST)
 
 async function static_content(request: Request, pathname: string): Promise<Response> {
-
   // stripe leading slashes and "assets to match the format in static_manifest
   const clean_path = pathname.replace(/^\/assets\//, '')
 

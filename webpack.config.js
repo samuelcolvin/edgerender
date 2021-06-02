@@ -8,14 +8,11 @@ module.exports = {
     publicPath: '/',
     assetModuleFilename: 'assets/[name][ext][query]',
   },
-  devtool: 'cheap-module-source-map',
+  devtool: false,
   mode: 'development',
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.scss', '.sass'],  // TODO remove
-    modules: [
-      'edgerender',
-      'node_modules'
-    ]
+    extensions: ['.ts', '.tsx', '.js'],
+    modules: ['edgerender', 'node_modules'],
   },
   plugins: [new CleanWebpackPlugin()],
   module: {
