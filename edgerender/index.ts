@@ -1,8 +1,18 @@
-import type {JsxChunk} from './render'
+import {JsxChunk, Key} from './render'
 
 export async function render_jsx(jsx_element: JSX.Element): Promise<string> {
   const jsx_obj: JsxChunk = await Promise.resolve(jsx_element)
   return await jsx_obj.render()
+}
+
+interface CustomTagProperties {
+  _tag: string
+  key?: Key
+  [key: string]: any
+}
+
+export const CustomTag = ({_tag, key, ...props}: CustomTagProperties): JsxChunk => {
+  return new JsxChunk(_tag, key, props)
 }
 
 export class RawHtml {

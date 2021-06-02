@@ -36,7 +36,7 @@ export class JsxChunk {
   readonly props: Props
   readonly children: ChildType[]
 
-  constructor(el: ElementType, args: Props, key: Key = null) {
+  constructor(el: ElementType, key: Key = null, args: Props) {
     this.el = el
     this.key = key
     this.args = args
