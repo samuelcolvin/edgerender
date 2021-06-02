@@ -1,4 +1,4 @@
-import {render_jsx, raw_html} from './jsx'
+import {render_jsx, raw_html} from 'edgerender'
 import main_styles from './styles/main.scss'
 import icon from './icons/icon.svg'
 import script_src from '!raw-loader!./raw_javascript.js'

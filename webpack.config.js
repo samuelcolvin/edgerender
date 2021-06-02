@@ -6,12 +6,16 @@ module.exports = {
     filename: 'worker.js',
     path: path.join(__dirname, 'dist'),
     publicPath: '/',
-    assetModuleFilename: '/assets/[name][ext][query]',
+    assetModuleFilename: 'assets/[name][ext][query]',
   },
   devtool: 'cheap-module-source-map',
   mode: 'development',
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.scss', '.sass'],
+    extensions: ['.ts', '.tsx', '.js', '.scss', '.sass'],  // TODO remove
+    modules: [
+      'edgerender',
+      'node_modules'
+    ]
   },
   plugins: [new CleanWebpackPlugin()],
   module: {

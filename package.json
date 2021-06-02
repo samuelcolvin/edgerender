@@ -4,6 +4,7 @@
   "description": "Cloudflare worker TypeScript template",
   "main": "dist/worker.js",
   "scripts": {
+    "tsc": "tsc",
     "build": "webpack",
     "format": "prettier --write  '*.{json,js,toml}' 'src/**/*.ts' 'test/**/*.ts'",
     "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js,toml}' 'src/**/*.ts' 'test/**/*.ts'",
@@ -35,7 +36,6 @@
   },
   "dependencies": {
     "@cloudflare/workers-types": "^2.2.2",
-    "@types/escape-html": "^1.0.1",
     "@types/jest": "^26.0.23",
     "@types/mime": "^2.0.3",
     "@types/react": "^17.0.8",
