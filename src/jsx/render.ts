@@ -1,7 +1,7 @@
-import type * as CSS from 'csstype'
-import escapeHtml from 'escape-html'
 import {smart_typeof, SmartType} from './utils'
 import {RawHtml} from './index'
+import render_styles from './styles'
+import HtmlEscape from './escape'
 
 export type Props = Record<string, any>
 export type Component = (props: Props) => JsxChunk | Promise<JsxChunk>
@@ -55,7 +55,7 @@ export class JsxChunk {
     if (typeof el == 'string') {
       let attrs = ''
       for (const [key, value] of Object.entries(this.props)) {
-        attrs += render_prop(key, value)
+        attrs += render_attr(key, value)
       }
       if (EmptyTags.has(el)) {
         // TODO error if children exist?
@@ -81,7 +81,7 @@ export class JsxChunk {
   }
 }
 
-function render_prop(name: string, value: any): string {
+function render_attr(name: string, value: any): string {
   let attr_value: string | null = null
   let quote = '"'
 
@@ -90,7 +90,7 @@ function render_prop(name: string, value: any): string {
   } else {
     switch (smart_typeof(value)) {
       case SmartType.String:
-        attr_value = escapeHtml(value)
+        attr_value = HtmlEscape.attr_double(value)
         break
       case SmartType.Boolean:
         if (value === true) {
@@ -104,7 +104,8 @@ function render_prop(name: string, value: any): string {
         quote = attr_value.indexOf('"') == -1 ? '"' : "'"
         break
       default:
-        attr_value = escapeHtml(JSON.stringify(value))
+        attr_value = HtmlEscape.attr_single(JSON.stringify(value))
+        quote = "'"
     }
   }
   if (attr_value == null) {
@@ -126,7 +127,7 @@ function get_tag_name(name: string): string {
 async function render_child(child: ChildType): Promise<string> {
   switch (smart_typeof(child)) {
     case SmartType.String:
-      return escapeHtml(child as string)
+      return HtmlEscape.content(child as string)
     case SmartType.JsxChunk:
       return await (child as JsxChunk).render()
     case SmartType.Array:
@@ -134,113 +135,11 @@ async function render_child(child: ChildType): Promise<string> {
     case SmartType.RawHtml:
       return (child as RawHtml).html
     default:
-      return JSON.stringify(child)
+      return HtmlEscape.content(JSON.stringify(child))
   }
 }
 
 async function cat_array(child: ChildType[]): Promise<string> {
-  let result = ''
-  for (const item of child) {
-    result += await render_child(item)
-  }
-  return result
+  const results = await Promise.all(child.map(item => render_child(item)))
+  return results.join('')
 }
-
-function render_styles(styles: CSS.Properties): string | null {
-  let serialized = ''
-  let delimiter = ''
-  for (const [name, value] of Object.entries(styles)) {
-    const is_custom_property = name.indexOf('--') == 0
-    if (value != null) {
-      serialized +=
-        delimiter +
-        (is_custom_property ? name : get_style_name(name)) +
-        ':' +
-        get_style_value(name, value, is_custom_property) +
-        ';'
-
-      delimiter = ';'
-    }
-  }
-  return serialized || null
-}
-
-const uppercase_pattern = /([A-Z])/g
-const ms_pattern = /^ms-/
-const style_name_cache: Record<string, string> = {}
-
-function get_style_name(name: string): string {
-  // from https://github.com/facebook/react/blob/master/packages/react-dom/src/server/ReactPartialRenderer.js
-  // (processStyleName) and
-  // https://github.com/facebook/react/blob/master/packages/react-dom/src/shared/hyphenateStyleName.js
-  const cached_value = style_name_cache[name] as string | undefined
-  if (typeof cached_value == 'string') {
-    return cached_value
-  } else {
-    return (style_name_cache[name] = name.replace(uppercase_pattern, '-$1').toLowerCase().replace(ms_pattern, '-ms-'))
-  }
-}
-
-function get_style_value(name: string, value: string | number | null | boolean, is_custom_property: boolean): string {
-  // from https://github.com/facebook/react/blob/master/packages/react-dom/src/shared/dangerousStyleValue.js
-
-  const is_empty = value == null || typeof value === 'boolean' || value === ''
-  if (is_empty) {
-    return ''
-  }
-
-  if (!is_custom_property && typeof value === 'number' && value !== 0 && !unitless_numbers.has(name)) {
-    // Presumes implicit 'px' suffix for unitless numbers
-    return value + 'px'
-  }
-
-  return ('' + value).trim()
-}
-
-const unitless_numbers = new Set([
-  'animationIterationCount',
-  'aspectRatio',
-  'borderImageOutset',
-  'borderImageSlice',
-  'borderImageWidth',
-  'boxFlex',
-  'boxFlexGroup',
-  'boxOrdinalGroup',
-  'columnCount',
-  'columns',
-  'flex',
-  'flexGrow',
-  'flexPositive',
-  'flexShrink',
-  'flexNegative',
-  'flexOrder',
-  'gridArea',
-  'gridRow',
-  'gridRowEnd',
-  'gridRowSpan',
-  'gridRowStart',
-  'gridColumn',
-  'gridColumnEnd',
-  'gridColumnSpan',
-  'gridColumnStart',
-  'fontWeight',
-  'lineClamp',
-  'lineHeight',
-  'opacity',
-  'order',
-  'orphans',
-  'tabSize',
-  'widows',
-  'zIndex',
-  'zoom',
-
-  // SVG-related properties
-  'fillOpacity',
-  'floodOpacity',
-  'stopOpacity',
-  'strokeDasharray',
-  'strokeDashoffset',
-  'strokeMiterlimit',
-  'strokeOpacity',
-  'strokeWidth',
-])

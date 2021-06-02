@@ -97,7 +97,7 @@ async function foobar() {
       <script
         defer
         src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={raw_html('{"token": "8cc3c70dc90b4dd2bfebb1a603504003"}')}
+        data-cf-beacon={{token: '8cc3c70dc90b4dd2bfebb1a603504003'}}
       />
       </body>
     </html>
