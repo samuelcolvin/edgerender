@@ -1,4 +1,3 @@
-
 // TODO could use the approach in https://github.com/component/escape-html/blob/master/index.js
 // but not sure it would be faster
 const html_tags: Record<string, string> = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}

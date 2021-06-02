@@ -1,6 +1,6 @@
 import * as CSS from 'csstype'
 
-export default function (styles: CSS.Properties): string | null {
+export function render_styles(styles: CSS.Properties): string | null {
   let serialized = ''
   let delimiter = ''
   for (const [name, value] of Object.entries(styles)) {
@@ -23,6 +23,8 @@ const uppercase_pattern = /([A-Z])/g
 const ms_pattern = /^ms-/
 const style_name_cache: Record<string, string> = {}
 
+export const hyphenate = (name: string): string =>  name.replace(uppercase_pattern, '-$1').toLowerCase()
+
 function get_style_name(name: string): string {
   // from https://github.com/facebook/react/blob/master/packages/react-dom/src/server/ReactPartialRenderer.js
   // (processStyleName) and
@@ -31,7 +33,7 @@ function get_style_name(name: string): string {
   if (typeof cached_value == 'string') {
     return cached_value
   } else {
-    return (style_name_cache[name] = name.replace(uppercase_pattern, '-$1').toLowerCase().replace(ms_pattern, '-ms-'))
+    return (style_name_cache[name] = hyphenate(name).replace(ms_pattern, '-ms-'))
   }
 }
 

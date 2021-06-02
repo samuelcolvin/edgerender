@@ -1,6 +1,6 @@
 import {smart_typeof, SmartType} from './utils'
 import {RawHtml} from './index'
-import render_styles from './styles'
+import {hyphenate, render_styles} from './styles'
 import HtmlEscape from './escape'
 
 export type Props = Record<string, any>
@@ -53,15 +53,10 @@ export class JsxChunk {
   async render(): Promise<string> {
     const {el} = this
     if (typeof el == 'string') {
-      let attrs = ''
-      for (const [key, value] of Object.entries(this.props)) {
-        attrs += render_attr(key, value)
-      }
-      if (EmptyTags.has(el)) {
-        // TODO error if children exist?
-        return `<${el}${attrs}>`
+      if (el == 'html') {
+        return '<!doctype html>\n' + (await this.render_element(el))
       } else {
-        return `<${el}${attrs}>${await this.render_children()}</${el}>`
+        return await this.render_element(el)
       }
     } else if (el == Fragment) {
       return await this.render_children()
@@ -69,6 +64,20 @@ export class JsxChunk {
       const f = el as Component
       const jsx_chunk: JsxChunk = await Promise.resolve(f(this.args))
       return await jsx_chunk.render()
+    }
+  }
+
+  private async render_element(el: string): Promise<string> {
+    let attrs = ''
+    for (const [key, value] of Object.entries(this.props)) {
+      attrs += render_attr(key, value)
+    }
+    if (EmptyTags.has(el)) {
+      // TODO error if children exist?
+      return `<${el}${attrs}>`
+    } else {
+      const children = await this.render_children()
+      return `<${el}${attrs}>${children}</${el}>`
     }
   }
 
@@ -116,11 +125,14 @@ function render_attr(name: string, value: any): string {
 }
 
 function get_tag_name(name: string): string {
-  switch (name) {
-    case 'className':
-      return 'class'
-    default:
-      return name.toLowerCase()
+  if (name == 'className') {
+    return 'class'
+  } else if (name == 'htmlFor') {
+    return 'for'
+  } else if (name.startsWith('hx')) {
+    return hyphenate(name)
+  } else {
+    return name.toLowerCase()
   }
 }
 

@@ -15,22 +15,111 @@ declare global {
       children: unknown
     }
 
-    interface GenericHtmlElement {
+    interface BasicHtmlElement {
+      // Standard HTML Attributes
+      accessKey?: string
       className?: string
+      contentEditable?: boolean | 'inherit'
+      contextMenu?: string
+      dir?: string
+      draggable?: boolean
+      hidden?: boolean
       id?: string
-      styles?: CSS.Properties
+      lang?: string
+      placeholder?: string
+      slot?: string
+      spellCheck?: boolean
+      style?: CSS.Properties
+      tabIndex?: number
+      title?: string
+      translate?: 'yes' | 'no'
+
+      // Unknown
+      radioGroup?: string // <command>, <menuitem>
+
+      // WAI-ARIA
+      role?: string
+
+      // RDFa Attributes
+      about?: string
+      datatype?: string
+      inlist?: any
+      prefix?: string
+      property?: string
+      resource?: string
+      typeof?: string
+      vocab?: string
+
+      // Non-standard Attributes
+      autoCapitalize?: string
+      autoCorrect?: string
+      autoSave?: string
+      color?: string
+      itemProp?: string
+      itemScope?: boolean
+      itemType?: string
+      itemID?: string
+      itemRef?: string
+      results?: number
+      security?: string
+      unselectable?: 'on' | 'off'
+
+      // Living Standard
+      /**
+       * Hints at the type of data that might be entered by the user while editing the element or its contents
+       * @see https://html.spec.whatwg.org/multipage/interaction.html#input-modalities:-the-inputmode-attribute
+       */
+      inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'
+      /**
+       * Specify that a standard HTML element should behave like a defined custom built-in element
+       * @see https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is
+       */
+      is?: string
+
+      // htmx attributes https://htmx.org/docs/#ajax
+      hxGet?: string
+      hxPost?: string
+      hxPut?: string
+      hxPatch?: string
+      hxDelete?: string
+
+      hxSwap?: 'innerHTML'| 'outerHTML'| 'afterbegin'| 'beforebegin'| 'beforeend'| 'afterend'
+      hxSwapOob?: boolean
+      hxTarget?: string
+      hxTrigger?: string
+      hxSelect?: string
+      hxBoost?: boolean
+      hxPushUrl?: 'true'
+      hxPrompt?: string
+    }
+
+    interface GenericHtmlElement extends BasicHtmlElement {
       children?: ChildTypes | ChildTypes[]
       [key: string]: any
     }
 
-    interface EmptyHtmlElement {
-      className?: string
-      id?: string
-      styles?: CSS.Properties
+    interface EmptyHtmlElement extends BasicHtmlElement {
       children?: never
       [key: string]: any
     }
-    type HtmlElement = GenericHtmlElement | EmptyHtmlElement
+
+    interface ButtonHtmlElement extends BasicHtmlElement {
+      autoFocus?: boolean
+      disabled?: boolean
+      form?: string
+      formAction?: string
+      formEncType?: string
+      formMethod?: string
+      formNoValidate?: boolean
+      formTarget?: string
+      name?: string
+      type?: 'submit' | 'reset' | 'button'
+      value?: string | ReadonlyArray<string> | number
+
+      children?: ChildTypes | ChildTypes[]
+    }
+
+    type HtmlElement = GenericHtmlElement | EmptyHtmlElement | ButtonHtmlElement
 
     interface IntrinsicElements {
       a: GenericHtmlElement
@@ -48,7 +137,7 @@ declare global {
       blockquote: GenericHtmlElement
       body: GenericHtmlElement
       br: EmptyHtmlElement
-      button: GenericHtmlElement
+      button: ButtonHtmlElement
       canvas: GenericHtmlElement
       caption: GenericHtmlElement
       cite: GenericHtmlElement

@@ -1,16 +1,17 @@
 import mime from 'mime/lite'
-import render_page from './page'
+import {main, clicked} from './page'
 import {HttpError} from './utils'
-
 
 export async function route(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const {pathname} = url
+  console.log(`${request.method} ${url}`)
+  console.log('htmx request:', request.headers.get('hx-request') == 'true')
   if (pathname == '/') {
-    let html = await render_page()
-    if (/^<html/i.test(html)) {
-      html = '<!doctype html>' + html
-    }
+    const html = await main()
+    return new Response(html, {headers: content_headers(url, 'main.html')})
+  } else if (pathname == '/clicked/') {
+    const html = await clicked()
     return new Response(html, {headers: content_headers(url, 'main.html')})
   }
 
@@ -18,9 +19,14 @@ export async function route(request: Request): Promise<Response> {
     return await static_content(request, url)
   }
 
-  return await fetch(`https://smokeshow.helpmanual.io${pathname}`, request)
-  // throw new HttpError(404, 'Page Not Found')
+  if (pathname.startsWith('/fonts/')) {
+    return await fetch(`https://smokeshow.helpmanual.io${pathname}`, request)
+  }
+  throw new HttpError(404, 'Page Not Found')
 }
+
+const headers_object = (headers: Headers): Record<string, string> =>
+  Object.assign({}, ...Array.from(headers.entries()).map(([k, v]) => ({[k]: v})))
 
 declare const __STATIC_CONTENT_MANIFEST: string
 declare const __STATIC_CONTENT: KVNamespace
@@ -35,9 +41,6 @@ async function static_content(request: Request, url: URL): Promise<Response> {
 
   // stripe leading slashes and "assets to match the format in static_manifest
   const clean_path = url.pathname.replace(/^\/assets\//, '')
-
-  console.log('path:', {pathname: url.pathname, clean_path})
-  console.log('__STATIC_CONTENT_MANIFEST:', __STATIC_CONTENT_MANIFEST)
 
   const content_key = static_manifest[clean_path]
   if (content_key) {

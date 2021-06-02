@@ -48,7 +48,7 @@ document.getElementById('slider').onclick = () => {
 }
 `
 
-async function foobar() {
+async function MainPage() {
   const readme = 'this is the readme'
   return (
     <html lang="en">
@@ -69,43 +69,57 @@ async function foobar() {
         <link rel="preload" href={main_styles} as="style" crossOrigin="anonymous"/>
         <link rel="stylesheet" href={main_styles} crossOrigin="anonymous"/>
 
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-62733018-7"/>
+       <script src="https://unpkg.com/htmx.org@1.4.1"/>
       </head>
       <body>
-      <main>
-        <nav>
-          <div className="dark-control">
-            <MoonSvg/>
-            <div className="switch">
-              <span id="slider"/>
+        <main>
+          <nav>
+            <div className="dark-control">
+              <MoonSvg/>
+              <div className="switch">
+                <span id="slider"/>
+              </div>
             </div>
-          </div>
-          <script>
-            {raw_html(script_src)}
-          </script>
-        </nav>
-        <article>
-          <header>
-            <div className="weight-medium">README.md</div>
-            <a href="https://github.com/samuelcolvin/smokeshow">
-              <GitHubSvg/>
-              <span>samuelcolvin/smokeshow</span>
-            </a>
-          </header>
-          {readme}
-        </article>
-      </main>
-      <script
-        defer
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={{token: '8cc3c70dc90b4dd2bfebb1a603504003'}}
-      />
+            <script>
+              {raw_html(script_src)}
+            </script>
+          </nav>
+          <article>
+            <header>
+              <div className="weight-medium">README.md</div>
+              <a href="https://github.com/samuelcolvin/smokeshow">
+                <GitHubSvg/>
+                <span>samuelcolvin/smokeshow</span>
+              </a>
+            </header>
+            {readme}
+            <button hxPost="/clicked/" hxSwap="outerHTML" hxPushUrl="true">
+              Click Me
+            </button>
+            <button hxDelete="/account" hxPrompt="Enter your account name to confirm deletion">
+              Delete My Account
+            </button>
+          </article>
+        </main>
       </body>
     </html>
   )
 }
 
-export default async (): Promise<string> => {
-  const t = foobar()
+export async function main(): Promise<string> {
+  const t = MainPage()
+  return await render_jsx(t)
+}
+
+const Clicked = () => {
+  return (
+    <div>
+      This was clicked
+    </div>
+  )
+}
+
+export async function clicked(): Promise<string> {
+  const t = Clicked()
   return await render_jsx(t)
 }

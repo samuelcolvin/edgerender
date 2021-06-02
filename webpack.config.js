@@ -25,7 +25,7 @@ module.exports = {
         test: /\.s[ac]ss$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/[name].[hash].css[query]'
+          filename: 'assets/[name].[hash].css[query]',
         },
         use: [
           {
@@ -35,7 +35,7 @@ module.exports = {
                 outputStyle: 'expanded',
               },
             },
-          }
+          },
         ],
       },
     ],

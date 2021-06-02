@@ -15,5 +15,6 @@ entry-point = "."
 
 [build]
 command = "yarn build"
+
 [build.upload]
 format = "service-worker"
