@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
+    "outDir": "./ts-build",
     "jsx": "react-jsx",
     "jsxImportSource": "./jsx",
     "module": "commonjs",

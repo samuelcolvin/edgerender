@@ -1,4 +1,5 @@
 import {render_jsx, raw_html} from './jsx'
+import main_styles from './styles/main.scss'
 
 const MoonSvg = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -65,8 +66,8 @@ async function foobar() {
         <link rel="preload" href="/fonts/Inter-Medium.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
         <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
 
-        <link rel="preload" href="/styles.css" as="style" crossOrigin="anonymous"/>
-        <link rel="stylesheet" href="/styles.css" crossOrigin="anonymous"/>
+        <link rel="preload" href={main_styles} as="style" crossOrigin="anonymous"/>
+        <link rel="stylesheet" href={main_styles} crossOrigin="anonymous"/>
 
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-62733018-7"/>
       </head>

@@ -6,8 +6,12 @@ route = ""
 webpack_config = "webpack.config.js"
 workers_dev = true
 kv_namespaces = [
-  { binding = "TEMPLATES", preview_id = "0cf9b2a00a9c40f8b1d01374df81c024", id = "f1979c2914f3455c9896806d3ba9afb0" }
+  { binding = "ASSETS", preview_id = "e0a7c29ebdc844cc8d70e0ed1275c851", id = "bccee624e44446c7bd42700f58361546" }
 ]
+
+[site]
+bucket = "./dist/assets"
+entry-point = "."
 
 [build]
 command = "yarn build"
