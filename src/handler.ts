@@ -1,6 +1,6 @@
 import mime from 'mime/lite'
+import {HttpError} from 'edgerender/response'
 import {main, clicked} from './page'
-import {HttpError} from './utils'
 import favicon_path from './icons/favicon.ico'
 
 export async function route(request: Request): Promise<Response> {
@@ -28,9 +28,6 @@ export async function route(request: Request): Promise<Response> {
   }
   throw new HttpError(404, 'Page Not Found')
 }
-
-const headers_object = (headers: Headers): Record<string, string> =>
-  Object.assign({}, ...Array.from(headers.entries()).map(([k, v]) => ({[k]: v})))
 
 declare const __STATIC_CONTENT_MANIFEST: string
 declare const __STATIC_CONTENT: KVNamespace

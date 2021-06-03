@@ -1,7 +1,7 @@
 import {smart_typeof, SmartType} from './utils'
 import {RawHtml} from './index'
-import {hyphenate, render_styles} from './styles'
-import HtmlEscape from './escape'
+import {hyphenate, render_styles} from './utils/styles'
+import HtmlEscape from './utils/escape'
 
 export type Props = Record<string, any>
 export type Component = (props: Props) => JsxChunk | Promise<JsxChunk>
