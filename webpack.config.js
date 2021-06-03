@@ -1,12 +1,12 @@
 const path = require('path')
-const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 
 module.exports = {
   output: {
     filename: 'worker.js',
     path: path.join(__dirname, 'dist'),
     publicPath: '/',
-    assetModuleFilename: 'assets/[name][ext][query]',
+    assetModuleFilename: 'assets/[name].[hash][ext][query]',
+    clean: true,
   },
   devtool: false,
   mode: 'development',
@@ -14,7 +14,6 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js'],
     modules: ['edgerender', 'node_modules'],
   },
-  plugins: [new CleanWebpackPlugin()],
   module: {
     rules: [
       {
@@ -28,18 +27,9 @@ module.exports = {
         test: /\.s[ac]ss$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/[name].css[query]',
+          filename: 'assets/[name].[hash].css[query]',
         },
-        use: [
-          {
-            loader: 'sass-loader',
-            options: {
-              sassOptions: {
-                outputStyle: 'expanded',
-              },
-            },
-          },
-        ],
+        loader: path.join(__dirname, 'custom-sass-loader.js'),
       },
       {
         test: /\.(css|png|ico|jpe?g|svg|woff2?|ttf)$/i,
