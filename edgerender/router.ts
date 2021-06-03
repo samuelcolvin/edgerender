@@ -1,6 +1,7 @@
 import {HttpError} from './response'
 import Sentry from './sentry'
 import type {JsxChunk} from './render'
+import {default_security_headers, MimeTypes, Assets} from './assets'
 
 export interface RequestContext {
   request: Request
@@ -8,7 +9,8 @@ export interface RequestContext {
   match: RegExpMatchArray | boolean
   cleaned_path: string
   is_htmx: boolean
-  router?: Router
+  router: Router
+  assets?: Assets
 }
 
 export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS'
@@ -25,13 +27,16 @@ export type Views = View[]
 
 type Page = (children: JsxChunk, context: RequestContext) => JsxChunk | Promise<JsxChunk>
 
+// TODO csp
 export interface RouterConfig {
   views: View[]
   page?: Page
-  debug?: boolean,
-  sentry_dsn?: string,
-  sentry_release?: string,
-  sentry_environment?: string,
+  debug?: boolean
+  sentry_dsn?: string
+  sentry_release?: string
+  sentry_environment?: string
+  assets?: Assets
+  security_headers?: Record<string, string>
 }
 
 export class Router {
@@ -39,14 +44,20 @@ export class Router {
   readonly page?: Page
   readonly debug: boolean
   readonly sentry?: Sentry
+  readonly assets?: Assets
+  readonly security_headers: Record<string, string>
 
   constructor(config: RouterConfig) {
     this.views = config.views
     this.page = config.page
     this.debug = config.debug || false
+    this.assets = config.assets
+    this.security_headers = config.security_headers || default_security_headers
     if (config.sentry_dsn) {
       this.sentry = new Sentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
     }
+    this.handler = this.handler.bind(this)
+    this.handle = this.handle.bind(this)
   }
 
   handler(event: FetchEvent): void {
@@ -60,24 +71,28 @@ export class Router {
       return await this.route(request)
     } catch (exc) {
       if (exc instanceof HttpError) {
-        console.warn(exc.message)
-        return exc.response()
+        return this.on_http_error(exc)
       }
       console.error('error handling request:', request, exc)
       if (this.sentry) {
         this.sentry.captureException(event, exc)
       }
       const body = this.debug ? `\nError occurred on the edge:\n\n${exc.message}\n${exc.stack}\n` : 'Edge Server Error'
-      return new Response(body, {status: 500})
+      return new Response(body, {status: 500, headers: this.http_headers(MimeTypes.plaintext)})
     }
   }
 
   private async route(request: Request): Promise<Response> {
     const url = new URL(request.url)
-    const cleaned_path = Router.clean_path(url)
+    const {pathname} = url
+    const cleaned_path = Router.clean_path(pathname)
     const is_htmx = request.headers.get('hx-request') == 'true'
-
     console.debug(`${request.method} ${cleaned_path} (cleaned)`)
+
+    if (this.assets && this.assets.is_static_path(pathname)) {
+      return await this.assets.response(request, pathname)
+    }
+
     for (const view of this.views) {
       let match
       if (typeof view.match == 'string') {
@@ -91,7 +106,15 @@ export class Router {
 
       Router.check_method(request, view.allow || 'GET')
 
-      const context: RequestContext = {request, url, match, cleaned_path, is_htmx, router: this}
+      const context: RequestContext = {
+        request,
+        url,
+        match,
+        cleaned_path,
+        is_htmx,
+        router: this,
+        assets: this.assets,
+      }
       let result: Response | JsxChunk = await Promise.resolve(view.view(context))
       if (result instanceof Response) {
         return result
@@ -100,34 +123,39 @@ export class Router {
           result = await Promise.resolve(this.page(result, context))
         }
         const html = await result.render()
-        return new Response(html, {headers: this.http_headers()})
+        return new Response(html, {headers: this.http_headers(MimeTypes.html)})
       }
     }
 
-    return await this.on_404({request, url, match: false, cleaned_path, is_htmx, router: this})
+    return await this.on_404({
+      request,
+      url,
+      match: false,
+      cleaned_path,
+      is_htmx,
+      router: this,
+      assets: this.assets,
+    })
   }
 
-  http_headers(): Record<string, string> {
-    return {
-      'Content-Type': 'text/html',
-      'X-Frame-Options': 'DENY',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-      'X-XSS-Protection': '1; mode=block',
-      'X-Content-Type-Options': 'nosniff',
-      'Referrer-Policy': 'origin',
-    }
+  protected http_headers(mime_type: MimeTypes): Record<string, string> {
+    return {'Content-Type': mime_type, ...this.security_headers}
   }
 
-  async on_404(context: RequestContext): Promise<Response> {
+  protected async on_404(context: RequestContext): Promise<Response> {
     throw new HttpError(404, `Page not found for "${context.url.pathname}"`)
   }
 
-  private static clean_path(url: URL): string {
-    let path = url.pathname
-    if (!path.includes('.') && !path.endsWith('/')) {
-      path += '/'
+  protected async on_http_error(exc: HttpError): Promise<Response> {
+    console.warn(exc.message)
+    return exc.response(this.http_headers(MimeTypes.plaintext))
+  }
+
+  private static clean_path(pathname: string): string {
+    if (!pathname.includes('.') && !pathname.endsWith('/')) {
+      pathname += '/'
     }
-    return path
+    return pathname
   }
 
   private static check_method(request: Request, allow: Method | Method[]): void {

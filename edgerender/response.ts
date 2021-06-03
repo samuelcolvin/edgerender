@@ -1,4 +1,3 @@
-
 export function simple_response(
   body: string | ReadableStream | ArrayBuffer,
   content_type = 'text/html',
@@ -41,8 +40,9 @@ export class HttpError extends Error {
     this.headers = headers || {}
   }
 
-  response = (): Response => {
-    return new Response(`${this.status}: ${this.body}`, {status: this.status, headers: this.headers})
+  response = (default_headers: Record<string, string>): Response => {
+    const headers = {...default_headers, ...this.headers}
+    return new Response(`${this.status}: ${this.body}`, {status: this.status, headers})
   }
 }
 

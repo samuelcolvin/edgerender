@@ -1,4 +1,3 @@
-
 export default class Sentry {
   readonly sentry_key: string
   readonly sentry_app: string
@@ -107,7 +106,6 @@ interface SentryData {
   level?: string
   extra: Record<string, any>
 }
-
 
 const headers_object = (headers: Headers): Record<string, string> =>
   Object.assign({}, ...Array.from(headers.entries()).map(([k, v]) => ({[k]: v})))
