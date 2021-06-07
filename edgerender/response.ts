@@ -1,10 +1,11 @@
-
 export enum MimeTypes {
   html = 'text/html',
   plaintext = 'text/html',
   ico = 'image/vnd.microsoft.icon',
   octetStream = 'application/octet-stream',
+  json = 'application/json',
 }
+
 export const default_security_headers: Record<string, string> = {
   'X-Frame-Options': 'DENY',
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
@@ -13,16 +14,18 @@ export const default_security_headers: Record<string, string> = {
   'Referrer-Policy': 'origin',
 }
 
-export function simple_response(
-  body: string | ReadableStream | ArrayBuffer,
-  content_type = 'text/html',
-  expires_in: number | null = null,
-): Response {
-  return new Response(body, {headers: build_headers(content_type, expires_in)})
+export interface PreResponse {
+  status?: number
+  body: string | ReadableStream | ArrayBuffer
+  mime_type: MimeTypes
+  extra_headers?: Record<string, string>
 }
 
-export function json_response(obj: Record<string, any>): Response {
-  return new Response(JSON.stringify(obj, null, 2), {headers: {'content-type': 'application/json'}})
+export function json_response(obj: Record<string, any>): PreResponse {
+  return {
+    body: JSON.stringify(obj, null, 2),
+    mime_type: MimeTypes.json,
+  }
 }
 
 export class HttpError extends Error {
@@ -37,9 +40,13 @@ export class HttpError extends Error {
     this.headers = headers || {}
   }
 
-  response = (default_headers: Record<string, string>): Response => {
-    const headers = {...default_headers, ...this.headers}
-    return new Response(`${this.status}: ${this.body}`, {status: this.status, headers})
+  response(): PreResponse {
+    return {
+      body: `${this.status}: ${this.body}`,
+      mime_type: MimeTypes.plaintext,
+      status: this.status,
+      extra_headers: this.headers,
+    }
   }
 }
 

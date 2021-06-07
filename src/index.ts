@@ -24,7 +24,7 @@ const views: Views = {
     return json_response({match})
   },
   '/fonts/{file_name:.+}': ({request, url, assets}) => {
-    return assets.cached_proxy(request,`https://smokeshow.helpmanual.io${url.pathname}`)
+    return assets.cached_proxy(request, `https://smokeshow.helpmanual.io${url.pathname}`)
   },
 }
 const router = new Router({views, assets})

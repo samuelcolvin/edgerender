@@ -1,6 +1,6 @@
-import {HttpError, MimeTypes, default_security_headers} from './response'
+import {HttpError, MimeTypes, default_security_headers, PreResponse} from './response'
 import Sentry from './sentry'
-import type {JsxChunk} from './render'
+import {JsxChunk} from './render'
 import {Assets, AssetConfig} from './assets'
 import {escape_regex} from './utils'
 
@@ -23,7 +23,8 @@ export enum Method {
   options = 'OPTIONS',
 }
 
-type ViewReturnType = Response | JsxChunk | Promise<Response | JsxChunk>
+type ResponseTypes = PreResponse | Response | JsxChunk
+type ViewReturnType = ResponseTypes | Promise<ResponseTypes>
 export type ViewFunction = (context: RequestContext) => ViewReturnType
 export interface View {
   allow?: Method | Method[]
@@ -83,7 +84,12 @@ export class Router {
     const {request} = event
 
     try {
-      return await this.route(request)
+      const r = await this.route(request)
+      if (r instanceof Response) {
+        return r
+      } else {
+        return this.prepare_response(r)
+      }
     } catch (exc) {
       if (exc instanceof HttpError) {
         return this.on_http_error(exc)
@@ -93,11 +99,15 @@ export class Router {
         this.sentry.captureException(event, exc)
       }
       const body = this.debug ? `\nError occurred on the edge:\n\n${exc.message}\n${exc.stack}\n` : 'Edge Server Error'
-      return new Response(body, {status: 500, headers: this.http_headers(MimeTypes.plaintext)})
+      return this.prepare_response({
+        body,
+        status: 500,
+        mime_type: MimeTypes.plaintext,
+      })
     }
   }
 
-  private async route(request: Request): Promise<Response> {
+  private async route(request: Request): Promise<PreResponse | Response> {
     const url = new URL(request.url)
     const {pathname} = url
     const cleaned_path = clean_path(pathname)
@@ -138,15 +148,17 @@ export class Router {
         router: this,
         assets: this.assets,
       }
-      let result: Response | JsxChunk = await Promise.resolve(view.view(context))
-      if (result instanceof Response) {
-        return result
-      } else {
+      let result: ResponseTypes = await Promise.resolve(view.view(context))
+      if ('children' in result) {
         if (this.page) {
           result = await Promise.resolve(this.page(result, context))
         }
-        const html = await result.render()
-        return new Response(html, {headers: this.http_headers(MimeTypes.html)})
+        return {
+          body: await result.render(),
+          mime_type: MimeTypes.html,
+        }
+      } else {
+        return result
       }
     }
 
@@ -161,17 +173,19 @@ export class Router {
     })
   }
 
-  protected http_headers(mime_type: MimeTypes): Record<string, string> {
-    return {'Content-Type': mime_type, ...this.security_headers}
-  }
-
   protected async on_404(context: RequestContext): Promise<Response> {
     throw new HttpError(404, `Page not found for "${context.url.pathname}"`)
   }
 
   protected async on_http_error(exc: HttpError): Promise<Response> {
     console.warn(exc.message)
-    return exc.response(this.http_headers(MimeTypes.plaintext))
+    return this.prepare_response(exc.response())
+  }
+
+  protected prepare_response(r: PreResponse): Response {
+    const status = r.status || 200
+    const headers = {'Content-Type': r.mime_type, ...this.security_headers, ...(r.extra_headers || {})}
+    return new Response(r.body, {status, headers})
   }
 }
 
