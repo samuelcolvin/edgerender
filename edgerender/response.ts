@@ -5,6 +5,13 @@ export enum MimeTypes {
   ico = 'image/vnd.microsoft.icon',
   octetStream = 'application/octet-stream',
 }
+export const default_security_headers: Record<string, string> = {
+  'X-Frame-Options': 'DENY',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'X-XSS-Protection': '1; mode=block',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'origin',
+}
 
 export function simple_response(
   body: string | ReadableStream | ArrayBuffer,

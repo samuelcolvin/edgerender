@@ -1,6 +1,6 @@
 import {JsxChunk, Key} from './render'
 export {Router, Views} from './router'
-export {Assets} from './assets'
+export {AssetConfig} from './assets'
 
 export async function render_jsx(jsx_element: JSX.Element): Promise<string> {
   const jsx_obj: JsxChunk = await Promise.resolve(jsx_element)

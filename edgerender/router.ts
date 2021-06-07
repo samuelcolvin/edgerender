@@ -1,7 +1,7 @@
-import {HttpError, MimeTypes} from './response'
+import {HttpError, MimeTypes, default_security_headers} from './response'
 import Sentry from './sentry'
 import type {JsxChunk} from './render'
-import {default_security_headers, Assets} from './assets'
+import {Assets, AssetConfig} from './assets'
 import {escape_regex} from './utils'
 
 export interface RequestContext {
@@ -11,7 +11,7 @@ export interface RequestContext {
   match: Record<string, string>
   is_htmx: boolean
   router: Router
-  assets?: Assets
+  assets: Assets
 }
 
 export enum Method {
@@ -41,7 +41,7 @@ export interface RouterConfig {
   sentry_dsn?: string
   sentry_release?: string
   sentry_environment?: string
-  assets?: Assets
+  assets?: AssetConfig
   security_headers?: Record<string, string>
 }
 
@@ -56,7 +56,7 @@ export class Router {
   readonly page?: Page
   readonly debug: boolean
   readonly sentry?: Sentry
-  readonly assets?: Assets
+  readonly assets: Assets
   readonly security_headers: Record<string, string>
 
   constructor(config: RouterConfig) {
@@ -64,8 +64,10 @@ export class Router {
     console.debug('views:', this.views)
     this.page = config.page
     this.debug = config.debug || false
-    this.assets = config.assets
     this.security_headers = config.security_headers || default_security_headers
+    const assets_config: AssetConfig = config.assets || {}
+    const AssetsClass = assets_config.asset_class || Assets
+    this.assets = new AssetsClass(assets_config, this.security_headers)
     if (config.sentry_dsn) {
       this.sentry = new Sentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
     }

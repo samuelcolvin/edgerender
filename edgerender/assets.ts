@@ -1,40 +1,33 @@
 import mime from 'mime/lite'
+import {escape_regex} from './utils'
 import {HttpError, MimeTypes, KVFile, response_from_kv, simple_response} from './response'
 
-export const default_security_headers: Record<string, string> = {
-  'X-Frame-Options': 'DENY',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  'X-XSS-Protection': '1; mode=block',
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'origin',
-}
-
 export interface AssetConfig {
-  path: string
-  content_manifest: string
-  kv_namespace: KVNamespace
-  security_headers?: Record<string, string>
+  content_manifest?: string
+  kv_namespace?: KVNamespace
+  path?: string
   cache_control?: string
+  asset_class?: typeof Assets
 }
 
 export class Assets {
   protected readonly path: string
   protected readonly prefix: RegExp
   protected readonly manifest: Record<string, string>
-  protected readonly kv_namespace: KVNamespace
+  protected readonly kv_namespace?: KVNamespace
   protected readonly security_headers: Record<string, string>
   protected readonly cache_control: string
 
-  constructor(config: AssetConfig) {
-    this.path = config.path
+  constructor(config: AssetConfig, security_headers: Record<string, string>) {
+    this.path = config.path || '/assets/'
     if (!this.path.startsWith('/') || !this.path.endsWith('/')) {
       throw Error('static path must start and end with "/"')
     }
 
-    this.prefix = new RegExp(`^${escape_regex(config.path)}`)
-    this.manifest = JSON.parse(config.content_manifest)
+    this.prefix = new RegExp(`^${escape_regex(this.path)}`)
+    this.manifest = JSON.parse(config.content_manifest || '{}')
     this.kv_namespace = config.kv_namespace
-    this.security_headers = config.security_headers || default_security_headers
+    this.security_headers = security_headers
     this.cache_control = config.cache_control || 'public, max-age=86400'
   }
 
@@ -52,6 +45,10 @@ export class Assets {
     } else {
       throw new HttpError(404, `content not found for path "${asset_path}"`)
     }
+    if (this.kv_namespace == undefined) {
+      console.warn(`KV namespace not defined, static assets not available`)
+      throw new HttpError(404, `content not found for path "${asset_path}"`)
+    }
 
     const content = await this.kv_namespace.get(content_key, 'arrayBuffer')
     if (content === null) {
@@ -65,6 +62,9 @@ export class Assets {
 
   async cached_proxy(request: Request, url: string, custom_content_type: string | null = null): Promise<Response> {
     const cache_key = `cached-file:${url}`
+    if (this.kv_namespace == undefined) {
+      throw new Error(`KV namespace not defined, static assets not available`)
+    }
 
     const cache_value = await this.kv_namespace.getWithMetadata(cache_key, 'stream')
     if (cache_value.value) {
@@ -75,7 +75,7 @@ export class Assets {
     if (r.status != 200) {
       throw new HttpError(502, `Error getting "${url}", response: ${r.status}`)
     }
-    const content_type = custom_content_type || request.headers.get('content-type') || MimeTypes.octetStream
+    const content_type = custom_content_type || r.headers.get('content-type') || MimeTypes.octetStream
 
     const blob = await r.blob()
     const body = await blob.arrayBuffer()
@@ -102,9 +102,3 @@ export class Assets {
 const known_mime_types: Record<string, MimeTypes> = {
   '.ico': MimeTypes.ico,
 }
-
-/*
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
- * $& means the whole matched string
- */
-const escape_regex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
