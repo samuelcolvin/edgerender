@@ -1,6 +1,6 @@
-import {Foobar} from './worker/page'
 import {JsxChunk} from 'edgerender/render'
 import {render_jsx} from 'edgerender'
+import {Foobar} from './worker/page'
 
 describe('jsx', () => {
   test('simple-render', async () => {

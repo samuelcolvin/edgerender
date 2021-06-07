@@ -1,5 +1,5 @@
-import {router} from './worker'
 import makeServiceWorkerEnv from 'service-worker-mock'
+import {router} from './worker'
 
 declare const global: any
 
