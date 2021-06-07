@@ -62,9 +62,11 @@ export class Router {
 
   constructor(config: RouterConfig) {
     this.views = Object.entries(config.views).map(as_path_view)
-    console.debug('views:', this.views)
     this.page = config.page
     this.debug = config.debug || false
+    if (this.debug) {
+      console.debug('views:', this.views)
+    }
     this.security_headers = config.security_headers || default_security_headers
     const assets_config: AssetConfig = config.assets || {}
     const AssetsClass = assets_config.asset_class || Assets
@@ -111,7 +113,9 @@ export class Router {
     const {pathname} = url
     const cleaned_path = clean_path(pathname)
     const is_htmx = request.headers.get('hx-request') == 'true'
-    console.debug(`${request.method} ${cleaned_path} (cleaned)`)
+    if (this.debug) {
+      console.debug(`${request.method} ${cleaned_path} (cleaned)`)
+    }
 
     if (this.assets && this.assets.is_static_path(pathname)) {
       return await this.assets.response(request, pathname)

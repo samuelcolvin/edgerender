@@ -1,14 +1,6 @@
-import {Router, AssetConfig, Views} from '../edgerender'
-import {json_response} from '../edgerender/response'
+import {Router, Views} from 'edgerender'
+import {json_response} from 'edgerender/response'
 import {IndexPage} from './page'
-
-declare const __STATIC_CONTENT_MANIFEST: string
-declare const __STATIC_CONTENT: KVNamespace
-
-const assets: AssetConfig = {
-  content_manifest: __STATIC_CONTENT_MANIFEST,
-  kv_namespace: __STATIC_CONTENT,
-}
 
 const views: Views = {
   '/': () => IndexPage(),
@@ -20,6 +12,6 @@ const views: Views = {
     return assets.cached_proxy(request, `https://smokeshow.helpmanual.io${url.pathname}`)
   },
 }
-export const router = new Router({views, assets})
+export const router = new Router({views})
 
-addEventListener('fetch', router.handler)
+// addEventListener('fetch', router.handler)

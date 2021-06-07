@@ -13,12 +13,13 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": true,
-    "baseUrl": "",
+    "baseUrl": ".",
     "paths": {
-      "edgerender": ["edgerender/*"],
+      "edgerender": ["edgerender"],
+      "edgerender/*": ["edgerender/*"],
     },
     "types": ["@cloudflare/workers-types", "@types/jest"]
   },
-  "include": ["src", "test-worker", "tests"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["edgerender"],
+  "exclude": ["node_modules", "dist", "test-worker", "tests"]
 }

@@ -1,5 +1,4 @@
-
-const Foobar = ({foo}: {foo: number}) => (
+export const Foobar = ({foo}: {foo: number}) => (
   <div>
     {foo * 2}
   </div>

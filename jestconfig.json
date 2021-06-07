@@ -1,7 +1,9 @@
 {
-  "transform": {
-    "^.+\\.(t|j)sx?$": "ts-jest"
-  },
   "testRegex": "/tests/.*\\.test\\.tsx?$",
-  "collectCoverageFrom": ["src/**/*.ts"]
+  "collectCoverageFrom": ["src/**/*.ts"],
+  "preset": "ts-jest",
+  "moduleDirectories": [
+    ".",
+    "node_modules"
+  ]
 }

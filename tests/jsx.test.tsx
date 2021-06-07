@@ -1,17 +1,14 @@
-const Foobar = ({foo}: {foo: number}) => (
-  <div>
-    {foo * 2}
-  </div>
-)
+import {Foobar} from '../test-worker/page'
+import {JsxChunk} from 'edgerender/render'
+import {render_jsx} from 'edgerender'
 
-const Page = () => (
-  <Foobar foo={4}/>
-)
 
 describe('jsx', () => {
 
-  test('', async () => {
-    const result = Page()
-    console.log('result:', result)
+  test('simple-render', async () => {
+    const result = Foobar({foo: 4})
+    expect(result).toBeInstanceOf(JsxChunk)
+    const text = await render_jsx(result)
+    expect(text).toEqual('<div>8</div>')
   })
 })
