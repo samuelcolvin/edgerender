@@ -13,10 +13,9 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": true,
-    "baseUrl": ".",
+    "baseUrl": "",
     "paths": {
-      "edgerender": ["src/*"],
-      "edgerender/*": ["src/*"]
+      "edgerender": ["edgerender/*"],
     },
     "types": ["@cloudflare/workers-types", "@types/jest"]
   },
