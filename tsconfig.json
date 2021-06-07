@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./ts-build",
+    "outDir": "dist",
     "jsx": "react-jsx",
     "jsxImportSource": "edgerender",
     "module": "commonjs",
@@ -12,12 +12,14 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "esModuleInterop": true,
+    "declaration": true,
     "baseUrl": ".",
     "paths": {
-      "edgerender": ["edgerender"]
+      "edgerender": ["src/*"],
+      "edgerender/*": ["src/*"]
     },
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types", "@types/jest"]
   },
-  "include": ["src", "edgerender"],
-  "exclude": ["node_modules", "dist", "test"]
+  "include": ["src", "test-worker", "tests"],
+  "exclude": ["node_modules", "dist"]
 }

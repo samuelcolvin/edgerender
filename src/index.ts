@@ -1,32 +1,28 @@
-import {Router, AssetConfig, Views} from 'edgerender'
-import {json_response} from '../edgerender/response'
-import {IndexPage} from './page'
-import favicon_path from './icons/favicon.ico'
-import './icons/icon.svg'
+import {JsxChunk, Key} from './render'
+export {Router, Views} from './router'
+export {AssetConfig} from './assets'
 
-declare const __STATIC_CONTENT_MANIFEST: string
-declare const __STATIC_CONTENT: KVNamespace
-
-const assets: AssetConfig = {
-  content_manifest: __STATIC_CONTENT_MANIFEST,
-  kv_namespace: __STATIC_CONTENT,
+export async function render_jsx(jsx_element: JSX.Element): Promise<string> {
+  const jsx_obj: JsxChunk = await Promise.resolve(jsx_element)
+  return await jsx_obj.render()
 }
 
-const views: Views = {
-  '/': () => IndexPage(),
-  '/favicon.ico': {
-    view: async ({assets, request}) => {
-      return await assets.response(request, favicon_path)
-    },
-  },
-  '/path/{id:int}/': ({match}) => {
-    console.log('match:', match)
-    return json_response({match})
-  },
-  '/fonts/{file_name:.+}': ({request, url, assets}) => {
-    return assets.cached_proxy(request, `https://smokeshow.helpmanual.io${url.pathname}`)
-  },
+interface CustomTagProperties {
+  _tag: string
+  key?: Key
+  [key: string]: any
 }
-const router = new Router({views, assets})
 
-addEventListener('fetch', router.handler)
+export const CustomTag = ({_tag, key, ...props}: CustomTagProperties): JsxChunk => {
+  return new JsxChunk(_tag, key, props)
+}
+
+export class RawHtml {
+  readonly html: string
+
+  constructor(html: string) {
+    this.html = html
+  }
+}
+
+export const raw_html = (html: string): RawHtml => new RawHtml(html)

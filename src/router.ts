@@ -73,14 +73,13 @@ export class Router {
       this.sentry = new Sentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
     }
     this.handler = this.handler.bind(this)
-    this.handle = this.handle.bind(this)
   }
 
   handler(event: FetchEvent): void {
     event.respondWith(this.handle(event))
   }
 
-  private async handle(event: FetchEvent): Promise<Response> {
+  async handle(event: FetchEvent): Promise<Response> {
     const {request} = event
 
     try {
@@ -107,7 +106,7 @@ export class Router {
     }
   }
 
-  private async route(request: Request): Promise<PreResponse | Response> {
+  protected async route(request: Request): Promise<PreResponse | Response> {
     const url = new URL(request.url)
     const {pathname} = url
     const cleaned_path = clean_path(pathname)
