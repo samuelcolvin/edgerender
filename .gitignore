@@ -5,3 +5,4 @@ transpiled
 /.idea/
 /scratch/
 /ts-build/
+/coverage/
