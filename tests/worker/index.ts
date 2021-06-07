@@ -1,5 +1,5 @@
-import {Router, Views} from 'edgerender'
-import {json_response} from 'edgerender/response'
+import {Router, Views} from '../../edgerender'
+import {json_response} from '../../edgerender/response'
 import {IndexPage} from './page'
 
 const views: Views = {

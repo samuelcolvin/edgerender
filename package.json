@@ -4,8 +4,8 @@
   "description": "Cloudflare worker TypeScript template",
   "main": "dist/worker.js",
   "scripts": {
-    "format": "prettier --write  '*.{json,js,toml}' 'src/**/*.ts' 'edgerender/**/*.ts' 'tests/**/*.ts'",
-    "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js,toml}' 'src/**/*.ts' 'edgerender/**/*.ts' 'tests/**/*.ts'",
+    "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.ts' 'tests/**/*.{ts,tsx}'",
+    "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js,toml}' 'edgerender/**/*.ts' 'tests/**/*.{ts,tsx}'",
     "test": "jest --config jestconfig.json --verbose"
   },
   "author": "author",
