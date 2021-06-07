@@ -1,7 +1,7 @@
-import {HttpError} from './response'
+import {HttpError, MimeTypes} from './response'
 import Sentry from './sentry'
 import type {JsxChunk} from './render'
-import {default_security_headers, MimeTypes, Assets} from './assets'
+import {default_security_headers, Assets} from './assets'
 import {escape_regex} from './utils'
 
 export interface RequestContext {

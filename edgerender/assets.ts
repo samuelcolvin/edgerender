@@ -1,5 +1,5 @@
 import mime from 'mime/lite'
-import {HttpError} from './response'
+import {HttpError, MimeTypes, KVFile, response_from_kv, simple_response} from './response'
 
 export const default_security_headers: Record<string, string> = {
   'X-Frame-Options': 'DENY',
@@ -7,13 +7,6 @@ export const default_security_headers: Record<string, string> = {
   'X-XSS-Protection': '1; mode=block',
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'origin',
-}
-
-export enum MimeTypes {
-  html = 'text/html',
-  plaintext = 'text/html',
-  ico = 'image/vnd.microsoft.icon',
-  octetStream = 'application/octet-stream',
 }
 
 export interface AssetConfig {
@@ -68,6 +61,26 @@ export class Assets {
     } else {
       return new Response(content, {headers: this.http_headers(pathname)})
     }
+  }
+
+  async cached_proxy(request: Request, url: string, custom_content_type: string | null = null): Promise<Response> {
+    const cache_key = `cached-file:${url}`
+
+    const cache_value = await this.kv_namespace.getWithMetadata(cache_key, 'stream')
+    if (cache_value.value) {
+      return response_from_kv(cache_value as KVFile, 3600)
+    }
+    console.log(`"${url}" not yet cached, downloading`)
+    const r = await fetch(url, request)
+    if (r.status != 200) {
+      throw new HttpError(502, `Error getting "${url}", response: ${r.status}`)
+    }
+    const content_type = custom_content_type || request.headers.get('content-type') || MimeTypes.octetStream
+
+    const blob = await r.blob()
+    const body = await blob.arrayBuffer()
+    await this.kv_namespace.put(cache_key, body, {expirationTtl: 3600 * 24 * 30, metadata: {content_type}})
+    return simple_response(body, content_type, 3600)
   }
 
   protected http_headers(pathname: string): Record<string, string> {

@@ -1,3 +1,11 @@
+
+export enum MimeTypes {
+  html = 'text/html',
+  plaintext = 'text/html',
+  ico = 'image/vnd.microsoft.icon',
+  octetStream = 'application/octet-stream',
+}
+
 export function simple_response(
   body: string | ReadableStream | ArrayBuffer,
   content_type = 'text/html',
@@ -8,24 +16,6 @@ export function simple_response(
 
 export function json_response(obj: Record<string, any>): Response {
   return new Response(JSON.stringify(obj, null, 2), {headers: {'content-type': 'application/json'}})
-}
-
-export async function cached_proxy(kv_namespace: KVNamespace, url: string, content_type: string): Promise<Response> {
-  const cache_key = `file:${url}`
-
-  const cache_value = await kv_namespace.getWithMetadata(cache_key, 'stream')
-  if (cache_value.value) {
-    return response_from_kv(cache_value as KVFile, 3600)
-  }
-  console.log(`"${url}" not yet cached, downloading`)
-  const r = await fetch(url)
-  if (r.status != 200) {
-    throw new HttpError(502, `Error getting "${url}", response: ${r.status}`)
-  }
-  const blob = await r.blob()
-  const body = await blob.arrayBuffer()
-  await kv_namespace.put(cache_key, body, {expirationTtl: 3600 * 24 * 30, metadata: {content_type}})
-  return simple_response(body, content_type, 3600)
 }
 
 export class HttpError extends Error {

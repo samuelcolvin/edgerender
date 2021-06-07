@@ -29,7 +29,7 @@ const GitHubSvg = () => (
   </svg>
 )
 
-async function MainPage() {
+export async function IndexPage() {
   const readme = 'this is the readme'
   return (
     <html lang="en">
@@ -93,10 +93,10 @@ async function MainPage() {
   )
 }
 
-export async function main(): Promise<string> {
-  const t = MainPage()
-  return await render_jsx(t)
-}
+// export async function main(): Promise<string> {
+//   const t = MainPage()
+//   return await render_jsx(t)
+// }
 
 const Clicked = () => {
   return (
