@@ -21,3 +21,5 @@ export const smart_typeof = (obj: any): SmartType => {
    */
   return Object.getPrototypeOf(obj).constructor.name as SmartType
 }
+
+export const escape_regex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

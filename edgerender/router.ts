@@ -2,34 +2,40 @@ import {HttpError} from './response'
 import Sentry from './sentry'
 import type {JsxChunk} from './render'
 import {default_security_headers, MimeTypes, Assets} from './assets'
+import {escape_regex} from './utils'
 
 export interface RequestContext {
   request: Request
+  method: Method
   url: URL
-  match: RegExpMatchArray | boolean
-  cleaned_path: string
+  match: Record<string, string>
   is_htmx: boolean
   router: Router
   assets?: Assets
 }
 
-export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS'
+export enum Method {
+  get = 'GET',
+  post = 'POST',
+  put = 'PUT',
+  patch = 'PATCH',
+  delete = 'DELETE',
+  options = 'OPTIONS',
+}
 
 type ViewReturnType = Response | JsxChunk | Promise<Response | JsxChunk>
+export type ViewFunction = (context: RequestContext) => ViewReturnType
 export interface View {
-  match: RegExp | string
   allow?: Method | Method[]
-  view: {
-    (context: RequestContext): ViewReturnType
-  }
+  view: ViewFunction
 }
-export type Views = View[]
+export type Views = Record<string, View | ViewFunction>
 
 type Page = (children: JsxChunk, context: RequestContext) => JsxChunk | Promise<JsxChunk>
 
 // TODO csp
 export interface RouterConfig {
-  views: View[]
+  views: Views
   page?: Page
   debug?: boolean
   sentry_dsn?: string
@@ -39,8 +45,14 @@ export interface RouterConfig {
   security_headers?: Record<string, string>
 }
 
+interface PathView {
+  path: RegExp | string
+  allow: Set<Method>
+  view: ViewFunction
+}
+
 export class Router {
-  readonly views: View[]
+  readonly views: PathView[]
   readonly page?: Page
   readonly debug: boolean
   readonly sentry?: Sentry
@@ -48,7 +60,8 @@ export class Router {
   readonly security_headers: Record<string, string>
 
   constructor(config: RouterConfig) {
-    this.views = config.views
+    this.views = Object.entries(config.views).map(as_path_view)
+    console.debug('views:', this.views)
     this.page = config.page
     this.debug = config.debug || false
     this.assets = config.assets
@@ -85,32 +98,40 @@ export class Router {
   private async route(request: Request): Promise<Response> {
     const url = new URL(request.url)
     const {pathname} = url
-    const cleaned_path = Router.clean_path(pathname)
+    const cleaned_path = clean_path(pathname)
     const is_htmx = request.headers.get('hx-request') == 'true'
     console.debug(`${request.method} ${cleaned_path} (cleaned)`)
 
     if (this.assets && this.assets.is_static_path(pathname)) {
       return await this.assets.response(request, pathname)
     }
+    const method = request.method as Method
 
     for (const view of this.views) {
-      let match
-      if (typeof view.match == 'string') {
-        match = view.match == cleaned_path
+      let match: Record<string, string> = {}
+      if (typeof view.path == 'string') {
+        if (view.path != cleaned_path) {
+          continue
+        }
       } else {
-        match = cleaned_path.match(view.match)
-      }
-      if (!match) {
-        continue
+        const m = cleaned_path.match(view.path)
+        if (!m) {
+          continue
+        }
+        match = m.groups as Record<string, string>
       }
 
-      Router.check_method(request, view.allow || 'GET')
+      if (!view.allow.has(method)) {
+        const allow = [...view.allow].join(',')
+        const msg = `${method}: Method Not Allowed (allowed: ${allow})`
+        throw new HttpError(405, msg, {allow})
+      }
 
       const context: RequestContext = {
         request,
+        method,
         url,
         match,
-        cleaned_path,
         is_htmx,
         router: this,
         assets: this.assets,
@@ -129,9 +150,9 @@ export class Router {
 
     return await this.on_404({
       request,
+      method,
       url,
-      match: false,
-      cleaned_path,
+      match: {},
       is_htmx,
       router: this,
       assets: this.assets,
@@ -150,29 +171,66 @@ export class Router {
     console.warn(exc.message)
     return exc.response(this.http_headers(MimeTypes.plaintext))
   }
+}
 
-  private static clean_path(pathname: string): string {
-    if (!pathname.includes('.') && !pathname.endsWith('/')) {
-      pathname += '/'
+const clean_path = (pathname: string): string => pathname.replace(/\/+$/, '') || '/'
+
+function as_path_view([key, view]: [string, View | ViewFunction]): PathView {
+  const path = parse_path(key)
+  if (typeof view == 'function') {
+    return {path, view, allow: new Set([Method.get])}
+  } else {
+    let allow: Set<Method>
+    if (typeof view.allow == 'string') {
+      allow = new Set([view.allow])
+    } else {
+      allow = new Set(view.allow)
     }
-    return pathname
+    return {path, view: view.view, allow}
+  }
+}
+
+const group_regex = /{(\w+)(?::(.+?))?}([^{]*)/g
+
+// function parse_path(path: string): string | RegExp {
+function parse_path(path: string): string | RegExp {
+  if (!path.startsWith('/')) {
+    path = '/' + path
+  }
+  if (!path.includes('{')) {
+    if (path.includes('}')) {
+      throw new Error(`invalid path "${path}", "}" with no matching start "{"`)
+    } else {
+      return clean_path(path)
+    }
   }
 
-  private static check_method(request: Request, allow: Method | Method[]): void {
-    const req_method = request.method as Method
-    let allow_str: string
-    if (typeof allow == 'string') {
-      if (req_method == req_method) {
-        return
-      }
-      allow_str = allow
-    } else {
-      if (allow.includes(req_method)) {
-        return
-      }
-      allow_str = allow.join(',')
+  let regex_str = ''
+  let first = true
+  let last_ended = 0
+  for (const m of path.matchAll(group_regex)) {
+    if (first) {
+      regex_str += escape_regex(path.substr(0, m.index))
+      first = false
     }
-    const msg = `Method Not Allowed (allowed: ${allow_str})`
-    throw new HttpError(405, msg, {allow: allow_str})
+    regex_str += `(?<${m[1]}>${get_regex(m[2])})${escape_regex(m[3])}`
+    last_ended = (m.index || 0) + m[0].length
+  }
+  if (last_ended != path.length) {
+    throw new Error(`invalid path, match expression "${path}" can't be interpreted`)
+  }
+  regex_str = `^${clean_path(regex_str)}$`
+  return new RegExp(regex_str)
+}
+
+const word_regex = '[\\w\\-]+'
+
+function get_regex(group: string | undefined): string {
+  if (!group || group == 'word') {
+    return word_regex
+  } else if (group == 'int') {
+    return '\\d+'
+  } else {
+    return group
   }
 }
