@@ -4,3 +4,4 @@ transpiled
 worker
 /.idea/
 /scratch/
+/ts-build/

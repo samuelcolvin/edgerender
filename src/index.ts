@@ -1,22 +1,30 @@
-import {route} from './handler'
-import {HttpError} from './utils'
+import {Router, Assets, Views} from 'edgerender'
+import {simple_response} from '../edgerender/response'
+import favicon_path from './icons/favicon.ico'
+import './icons/icon.svg'
 
-addEventListener('fetch', e => e.respondWith(handle(e)))
+declare const __STATIC_CONTENT_MANIFEST: string
+declare const __STATIC_CONTENT: KVNamespace
 
-async function handle(event: FetchEvent): Promise<Response> {
-  const {request} = event
+const assets = new Assets({
+  path: '/assets/',
+  content_manifest: __STATIC_CONTENT_MANIFEST,
+  kv_namespace: __STATIC_CONTENT,
+})
 
-  try {
-    return await route(event)
-  } catch (exc) {
-    if (exc instanceof HttpError) {
-      console.warn(exc.message)
-      return exc.response()
-    }
-    console.error('error handling request:', request)
-    console.error('error:', exc)
-    // captureException(event, exc)
-    const body = `\nError occurred on the edge:\n\n${exc.message}\n${exc.stack}\n`
-    return new Response(body, {status: 500})
-  }
-}
+const views: Views = [
+  {
+    match: '/',
+    view: () => simple_response('this is index', 'text/html', 3600),
+  },
+  {
+    match: '/favicon.ico',
+    view: async context => {
+      const s = context.assets as Assets
+      return await s.response(context.request, favicon_path)
+    },
+  },
+]
+const router = new Router({views, assets})
+
+addEventListener('fetch', router.handler)

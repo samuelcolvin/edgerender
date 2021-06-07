@@ -1,65 +1,83 @@
-import {load_template, render_template} from 'edgerender-yatl'
-import {json_response, HttpError} from './utils'
-import 'sax-wasm/lib/sax-wasm.wasm'
+import mime from 'mime/lite'
+import {HttpError} from 'edgerender/response'
+import {main, clicked} from './page'
+import favicon_path from './icons/favicon.ico'
 
-declare const TEMPLATES: KVNamespace
-
-async function post_file(request: Request, pathname: string): Promise<Response> {
-  // TODO authentication!
-  const content_type = request.headers.get('content-type')
-  const {body} = request
-  if (body == null) {
-    throw new HttpError(400, 'No request body')
-  }
-
-  await TEMPLATES.put(`file:${pathname}`, body, {metadata: {content_type}})
-
-  return json_response({pathname, content_type})
-}
-
-declare const WASM_MODULE: WebAssembly.Module
-
-async function load_wasm(parser: any): Promise<void> {
-  const instance = new WebAssembly.Instance(WASM_MODULE, {
-    env: {
-      memoryBase: 0,
-      tableBase: 0,
-      memory: new WebAssembly.Memory({initial: 10} as WebAssembly.MemoryDescriptor),
-      table: new WebAssembly.Table({initial: 1, element: 'anyfunc'} as WebAssembly.TableDescriptor),
-      event_listener: parser.eventTrap,
-    },
-  })
-  parser.wasmSaxParser = instance.exports
-  const wasm_parser = instance.exports.parser as (v: number) => void
-  wasm_parser(parser.events)
-}
-
-async function file_loader (path: string): Promise<ReadableStream> {
-  const v = await TEMPLATES.get(`file:${path}`, 'stream')
-  if (!v) {
-    throw new Error(`xml "${path}" not found`)
-  }
-  return v
-}
-
-async function render_template_response(request: Request, pathname: string): Promise<Response> {
-  const template_elements = await load_template('/base.html', file_loader, load_wasm)
-  const r = await render_template(template_elements, {name: 'World', pathname}, {})
-  // const r = await render_string('<div>hello {{ name }}</div>', {name: 'World'}, {}, load_wasm)
-  return new Response(r)
-}
-
-export async function route(event: FetchEvent): Promise<Response> {
-  const {request} = event
-  const {pathname} = new URL(request.url)
-
-  if (request.method == 'POST') {
-    return await post_file(request, pathname)
-  }
-
+export async function route(request: Request): Promise<Response> {
+  const url = new URL(request.url)
+  const {pathname} = url
+  console.log(`${request.method} ${url}`)
+  console.log('htmx request:', request.headers.get('hx-request') == 'true')
   if (pathname == '/') {
-    return await render_template_response(request, pathname)
+    const html = await main()
+    return new Response(html, {headers: content_headers(pathname, 'main.html')})
+  } else if (pathname == '/clicked/') {
+    const html = await clicked()
+    return new Response(html, {headers: content_headers(pathname, 'main.html')})
   }
 
+  if (pathname.startsWith('/assets/')) {
+    return await static_content(request, pathname)
+  }
+
+  if (pathname.startsWith('/fonts/')) {
+    return await fetch(`https://smokeshow.helpmanual.io${pathname}`, request)
+  }
+  if (pathname == '/favicon.ico') {
+    return await static_content(request, favicon_path)
+  }
   throw new HttpError(404, 'Page Not Found')
+}
+
+declare const __STATIC_CONTENT_MANIFEST: string
+declare const __STATIC_CONTENT: KVNamespace
+// __STATIC_CONTENT_MANIFEST is a JSON generate by the "site" mode of wrangler
+const static_manifest: Record<string, string> = JSON.parse(__STATIC_CONTENT_MANIFEST)
+
+async function static_content(request: Request, pathname: string): Promise<Response> {
+  // stripe leading slashes and "assets to match the format in static_manifest
+  const clean_path = pathname.replace(/^\/assets\//, '')
+
+  const content_key = static_manifest[clean_path]
+  if (content_key) {
+    console.debug(`static file found path=${clean_path} content_key=${content_key}`)
+  } else {
+    throw new HttpError(404, `content not found for key "${content_key}"`)
+  }
+
+  // __STATIC_CONTENT is a KV namespace setup by the "site" mode of wrangler
+  const content = await __STATIC_CONTENT.get(content_key, 'arrayBuffer')
+  if (content === null) {
+    throw new HttpError(404, `content not found for key "${content_key}"`)
+  } else {
+    return new Response(content, {headers: content_headers(pathname, content_key)})
+  }
+}
+
+function content_headers(pathname: string, content_key: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': get_mime_type(content_key),
+    'X-Frame-Options': 'DENY',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+    'X-XSS-Protection': '1; mode=block',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'origin',
+  }
+
+  // if (csp_rules) {
+  //   headers['Content-Security-Policy'] = csp_rules
+  // }
+  if (pathname.startsWith('/assets/')) {
+    headers['Cache-Control'] = 'public, max-age=86400'
+  }
+  if (pathname.startsWith('/favicons/')) {
+    headers['Cache-Control'] = 'public, max-age=31536000'
+  }
+
+  return headers
+}
+
+function get_mime_type(content_key: string): string {
+  const m = content_key.toLocaleLowerCase().match(/\.([a-z]+)$/)
+  return (m && mime.getType(m[0])) || 'application/octet-stream'
 }
