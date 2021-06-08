@@ -62,9 +62,11 @@ export class Router {
 
   constructor(config: RouterConfig) {
     this.views = Object.entries(config.views).map(as_path_view)
-    console.debug('views:', this.views)
     this.page = config.page
     this.debug = config.debug || false
+    if (this.debug) {
+      console.debug('views:', this.views)
+    }
     this.security_headers = config.security_headers || default_security_headers
     const assets_config: AssetConfig = config.assets || {}
     const AssetsClass = assets_config.asset_class || Assets
@@ -73,14 +75,13 @@ export class Router {
       this.sentry = new Sentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
     }
     this.handler = this.handler.bind(this)
-    this.handle = this.handle.bind(this)
   }
 
   handler(event: FetchEvent): void {
     event.respondWith(this.handle(event))
   }
 
-  private async handle(event: FetchEvent): Promise<Response> {
+  async handle(event: FetchEvent): Promise<Response> {
     const {request} = event
 
     try {
@@ -107,12 +108,14 @@ export class Router {
     }
   }
 
-  private async route(request: Request): Promise<PreResponse | Response> {
+  protected async route(request: Request): Promise<PreResponse | Response> {
     const url = new URL(request.url)
     const {pathname} = url
     const cleaned_path = clean_path(pathname)
     const is_htmx = request.headers.get('hx-request') == 'true'
-    console.debug(`${request.method} ${cleaned_path} (cleaned)`)
+    if (this.debug) {
+      console.debug(`${request.method} ${cleaned_path} (cleaned)`)
+    }
 
     if (this.assets && this.assets.is_static_path(pathname)) {
       return await this.assets.response(request, pathname)

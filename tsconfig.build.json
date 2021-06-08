@@ -20,6 +20,6 @@
     },
     "types": ["@cloudflare/workers-types", "@types/jest"]
   },
-  "include": ["edgerender", "tests"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["edgerender"],
+  "exclude": ["node_modules", "dist", "tests"]
 }

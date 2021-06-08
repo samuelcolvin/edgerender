@@ -1,7 +1,8 @@
 dist
 node_modules
 transpiled
-worker
+/worker/
 /.idea/
 /scratch/
 /ts-build/
+/coverage/

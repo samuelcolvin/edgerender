@@ -87,7 +87,7 @@ export class JsxChunk {
   }
 
   toString() {
-    return `JsxElement<${this.el} (${JSON.stringify(this.args)})>`
+    return `JsxElement(${this.el}, ${JSON.stringify(this.args)})`
   }
 }
 
