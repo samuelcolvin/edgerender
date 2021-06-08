@@ -10,8 +10,7 @@ export function render_styles(styles: CSS.Properties): string | null {
         delimiter +
         (is_custom_property ? name : get_style_name(name)) +
         ':' +
-        get_style_value(name, value, is_custom_property) +
-        ';'
+        get_style_value(name, value, is_custom_property)
 
       delimiter = ';'
     }

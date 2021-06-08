@@ -1,4 +1,4 @@
-export const Foobar = ({foo}: {foo: number}) => <div>{foo * 2}</div>
+const Foobar = ({foo}: {foo: number}) => <div>{foo * 2}</div>
 
 export async function IndexPage() {
   return (
