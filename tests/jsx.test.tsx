@@ -1,6 +1,6 @@
 import each from 'jest-each'
 import {Component, JsxChunk} from 'edgerender/render'
-import {render_jsx} from 'edgerender'
+import {render_jsx, raw_html} from 'edgerender'
 
 describe('jsx', () => {
   test('render', async () => {
@@ -44,6 +44,45 @@ const components: ComponentTest[] = [
   {
     component: () => <input className={{foo: true, spam: false, bar: 1}} />,
     expected: '<input class="foo bar">',
+  },
+  {
+    component: ({thing}) => <div id="123">{raw_html(thing)}</div>,
+    args: {thing: '<b>new</b>'},
+    expected: '<div id="123"><b>new</b></div>',
+  },
+  {
+    component: () => (
+      <div>
+        {['a', 'b', 'c'].map(v => (
+          <span>{v}</span>
+        ))}
+      </div>
+    ),
+    expected: '<div><span>a</span><span>b</span><span>c</span></div>',
+  },
+  {
+    component: () => <label htmlFor="foobar">xxx</label>,
+    expected: '<label for="foobar">xxx</label>',
+  },
+  {
+    component: () => <textarea required={true}>boolean</textarea>,
+    expected: '<textarea required>boolean</textarea>',
+  },
+  {
+    component: () => <textarea required={false}>boolean</textarea>,
+    expected: '<textarea>boolean</textarea>',
+  },
+  {
+    component: () => (
+      <span id={raw_html('"thing"') as any} hxGet="foobar">
+        thing
+      </span>
+    ),
+    expected: `<span id='"thing"' hx-get="foobar">thing</span>`,
+  },
+  {
+    component: () => <input value={{foo: 'bar'} as any} />,
+    expected: `<input value='{"foo":"bar"}'>`,
   },
 ]
 
