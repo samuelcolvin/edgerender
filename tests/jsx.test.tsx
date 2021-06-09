@@ -91,6 +91,24 @@ const components: ComponentTest[] = [
     ),
     expected: '<div class="egg ham" xxx="4">this is the custom tag body</div>',
   },
+  {
+    component: ({condition}) => (
+      <div>
+        {condition ? <span>condition true</span> : <span>condition false</span>}
+      </div>
+    ),
+    args: {condition: true},
+    expected: '<div><span>condition true</span></div>',
+  },
+  {
+    component: ({condition}) => (
+      <div>
+        {condition ? <span>condition true</span> : <span>condition false</span>}
+      </div>
+    ),
+    args: {condition: false},
+    expected: '<div><span>condition false</span></div>',
+  },
 ]
 
 describe('render_jsx', () => {
