@@ -9,6 +9,10 @@
     "README.md",
     "LICENSE"
   ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./": "./dist/"
+  },
   "scripts": {
     "tsc": "tsc --build tsconfig.build.json",
     "copy": "cp edgerender/*.d.ts dist/ && cp edgerender/webpack.config.js dist/",
