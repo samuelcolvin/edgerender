@@ -70,7 +70,7 @@ export class Router {
     this.security_headers = config.security_headers || default_security_headers
     const assets_config: AssetConfig = config.assets || {}
     const AssetsClass = assets_config.asset_class || Assets
-    this.assets = new AssetsClass(assets_config, this.security_headers)
+    this.assets = new AssetsClass(assets_config, this.security_headers, this.debug)
     if (config.sentry_dsn) {
       this.sentry = new Sentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
     }
@@ -187,7 +187,7 @@ export class Router {
 
   protected prepare_response(r: PreResponse): Response {
     const status = r.status || 200
-    const headers = {'Content-Type': r.mime_type, ...this.security_headers, ...(r.extra_headers || {})}
+    const headers = {'Content-Type': r.mime_type, ...this.security_headers, ...(r.headers || {})}
     return new Response(r.body, {status, headers})
   }
 }

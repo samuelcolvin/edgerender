@@ -12,13 +12,14 @@ export interface AssetConfig {
 
 export class Assets {
   protected readonly path: string
+  debug?: boolean
   protected readonly prefix: RegExp
   protected readonly manifest: Record<string, string>
   protected readonly kv_namespace?: KVNamespace
   protected readonly security_headers: Record<string, string>
-  protected readonly extra_headers: Record<string, string>
+  protected readonly headers: Record<string, string>
 
-  constructor(config: AssetConfig, security_headers: Record<string, string>) {
+  constructor(config: AssetConfig, security_headers: Record<string, string>, debug: boolean) {
     this.path = config.path || '/assets/'
     if (!this.path.startsWith('/') || !this.path.endsWith('/')) {
       throw Error('static path must start and end with "/"')
@@ -28,9 +29,10 @@ export class Assets {
     this.manifest = JSON.parse(config.content_manifest || '{}')
     this.kv_namespace = config.kv_namespace
     this.security_headers = security_headers
-    this.extra_headers = {
+    this.headers = {
       'cache-control': config.cache_control || 'public, max-age=86400',
     }
+    this.debug = debug
   }
 
   is_static_path(pathname: string): boolean {
@@ -43,27 +45,34 @@ export class Assets {
 
     const content_key: string | undefined = this.manifest[asset_path]
     if (content_key) {
-      console.debug(`static file found path=${asset_path} content_key=${content_key}`)
+      if (this.debug) {
+        console.debug(`static file found path=${pathname} content_key=${content_key}`)
+      }
     } else {
-      throw new HttpError(404, `content not found for path "${asset_path}"`)
+      throw this.not_found_error(pathname)
     }
+
     if (this.kv_namespace == undefined) {
       console.warn(`KV namespace not defined, static assets not available`)
-      throw new HttpError(404, `content not found for path "${asset_path}"`)
+      throw this.not_found_error(pathname)
     }
 
     const body = await this.kv_namespace.get(content_key, 'arrayBuffer')
     if (body === null) {
       // TODO log to sentry
-      console.error(`content_key "${content_key}" found for asset_path "${asset_path}", but no value in the KV store`)
-      throw new HttpError(404, `content not found for path "${asset_path}"`)
+      console.error(`content_key "${content_key}" found for asset_path "${pathname}", but no value in the KV store`)
+      throw this.not_found_error(pathname)
     } else {
       return {
         body,
         mime_type: this.mime_type(pathname),
-        extra_headers: this.extra_headers,
+        headers: this.headers,
       }
     }
+  }
+
+  not_found_error(pathname: string): Error {
+    return new HttpError(404, `static asset "${pathname}" not found`)
   }
 
   async cached_proxy(request: Request, url: string, custom_mime_type: MimeTypes | null = null): Promise<PreResponse> {
@@ -77,14 +86,16 @@ export class Assets {
       const metadata: {mime_type: MimeTypes | undefined} = cache_value.metadata || ({} as any)
       return {
         body: cache_value.value,
-        mime_type: metadata.mime_type || MimeTypes.octetStream,
-        extra_headers: this.extra_headers,
+        mime_type: custom_mime_type || metadata.mime_type || MimeTypes.octetStream,
+        headers: this.headers,
       }
     }
-    console.log(`"${url}" not yet cached, downloading`)
+    if (this.debug) {
+      console.debug(`"${url}" not yet cached, downloading`)
+    }
     const r = await fetch(url, request)
     if (r.status != 200) {
-      throw new HttpError(502, `Error getting "${url}", response: ${r.status}`)
+      throw new HttpError(502, `Error getting "${url}", upstream response: ${r.status}`)
     }
     const mime_type: MimeTypes =
       custom_mime_type || (r.headers.get('content-type') as MimeTypes) || MimeTypes.octetStream
@@ -92,7 +103,7 @@ export class Assets {
     const blob = await r.blob()
     const body = await blob.arrayBuffer()
     await this.kv_namespace.put(cache_key, body, {expirationTtl: 3600 * 24 * 30, metadata: {mime_type}})
-    return {body, mime_type, extra_headers: this.extra_headers}
+    return {body, mime_type, headers: this.headers}
   }
 
   protected mime_type(pathname: string): MimeTypes {
