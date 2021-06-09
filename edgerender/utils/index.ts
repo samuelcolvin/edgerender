@@ -4,7 +4,7 @@ export enum SmartType {
   Number = 'Number',
   Boolean = 'Boolean',
   Date = 'Date',
-  Regexp = 'Regexp',
+  RegExp = 'RegExp',
   String = 'String',
   Array = 'Array',
   Object = 'Object',
@@ -19,7 +19,13 @@ export const smart_typeof = (obj: any): SmartType => {
   /**
    * Helper to get the type of object, including classes
    */
-  return Object.getPrototypeOf(obj).constructor.name as SmartType
+  if (obj == null) {
+    return SmartType.Null
+  } else if (obj == undefined) {
+    return SmartType.Undefined
+  } else {
+    return Object.getPrototypeOf(obj).constructor.name as SmartType
+  }
 }
 
 /*

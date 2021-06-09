@@ -92,22 +92,62 @@ const components: ComponentTest[] = [
     expected: '<div class="egg ham" xxx="4">this is the custom tag body</div>',
   },
   {
-    component: ({condition}) => (
-      <div>
-        {condition ? <span>condition true</span> : <span>condition false</span>}
-      </div>
-    ),
+    component: ({condition}) => <div>{condition ? <span>condition true</span> : null}</div>,
     args: {condition: true},
     expected: '<div><span>condition true</span></div>',
   },
   {
-    component: ({condition}) => (
-      <div>
-        {condition ? <span>condition true</span> : <span>condition false</span>}
-      </div>
-    ),
+    component: ({condition}) => <div>{condition ? <span>condition true</span> : null}</div>,
     args: {condition: false},
-    expected: '<div><span>condition false</span></div>',
+    expected: '<div></div>',
+  },
+  {
+    component: () => <span>null: "{null}"</span>,
+    expected: '<span>null: ""</span>',
+  },
+  {
+    component: () => <span>undefined: "{undefined}"</span>,
+    expected: '<span>undefined: ""</span>',
+  },
+  {
+    component: () => <span>true: "{true}"</span>,
+    expected: '<span>true: "true"</span>',
+  },
+  {
+    component: () => <span>false: "{false}"</span>,
+    expected: '<span>false: "false"</span>',
+  },
+  {
+    component: () => <span>date: "{new Date(2e12)}"</span>,
+    expected: '<span>date: ""2033-05-18T03:33:20.000Z""</span>',
+  },
+  {
+    component: () => <span>regex: "{/foobar/}"</span>,
+    expected: '<span>regex: "/foobar/"</span>',
+  },
+  {
+    component: () => <span>function: "{() => 'function-returns'}"</span>,
+    expected: '<span>function: "function-returns"</span>',
+  },
+  {
+    component: () => <span>promise: "{new Promise(resolve => resolve('promise-result'))}"</span>,
+    expected: '<span>promise: "promise-result"</span>',
+  },
+  {
+    component: () => <span>jsx object: "{<span>inner fragment</span>}"</span>,
+    expected: '<span>jsx object: "<span>inner fragment</span>"</span>',
+  },
+  {
+    component: () => <span>fragment: "{<>inner fragment</>}"</span>,
+    expected: '<span>fragment: "inner fragment"</span>',
+  },
+  {
+    component: () => <span>array: "{[1, 2, 3]}"</span>,
+    expected: '<span>array: "123"</span>',
+  },
+  {
+    component: () => <span>object: "{{a: 1, b: 2, c: 3}}"</span>,
+    expected: '<span>object: "{"a":1,"b":2,"c":3}"</span>',
   },
 ]
 

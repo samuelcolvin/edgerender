@@ -165,7 +165,7 @@ function get_tag_name(name: string): string {
   }
 }
 
-async function render_child(child: ChildType): Promise<string> {
+async function render_child(child: any): Promise<string> {
   switch (smart_typeof(child)) {
     case SmartType.String:
       return HtmlEscape.content(child as string)
@@ -175,6 +175,17 @@ async function render_child(child: ChildType): Promise<string> {
       return await cat_array(child as ChildType[])
     case SmartType.RawHtml:
       return (child as RawHtml).html
+    case SmartType.Null:
+    case SmartType.Undefined:
+      return ''
+    case SmartType.Number:
+      return (child as number).toString()
+    case SmartType.Function:
+      return await render_child((child as CallableFunction)())
+    case SmartType.Promise:
+      return await render_child((await child) as Promise<any>)
+    case SmartType.RegExp:
+      return HtmlEscape.content((child as RegExp).toString())
     default:
       return HtmlEscape.content(JSON.stringify(child))
   }
