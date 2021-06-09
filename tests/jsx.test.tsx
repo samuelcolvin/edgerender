@@ -1,6 +1,6 @@
 import each from 'jest-each'
 import {Component, JsxChunk} from 'edgerender/render'
-import {render_jsx, raw_html} from 'edgerender'
+import {render_jsx, raw_html, CustomTag} from 'edgerender'
 
 describe('jsx', () => {
   test('render', async () => {
@@ -83,6 +83,14 @@ const components: ComponentTest[] = [
   {
     component: () => <input value={{foo: 'bar'} as any} />,
     expected: `<input value='{"foo":"bar"}'>`,
+  },
+  {
+    component: () => (
+      <CustomTag _tag="div" className={['egg', 'ham']} xxx="4">
+        this is the custom tag body
+      </CustomTag>
+    ),
+    expected: '<div class="egg ham" xxx="4">this is the custom tag body</div>',
   },
 ]
 

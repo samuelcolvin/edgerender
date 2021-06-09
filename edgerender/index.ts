@@ -1,4 +1,4 @@
-import {JsxChunk, Key} from './render'
+import {ChildType, classNameType, JsxChunk, Key} from './render'
 export {Router, Views} from './router'
 export {AssetConfig} from './assets'
 
@@ -10,6 +10,8 @@ export async function render_jsx(jsx_element: JSX.Element): Promise<string> {
 interface CustomTagProperties {
   _tag: string
   key?: Key
+  className?: classNameType
+  children?: ChildType
   [key: string]: any
 }
 

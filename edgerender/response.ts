@@ -21,8 +21,9 @@ export interface PreResponse {
   headers?: Record<string, string>
 }
 
-export function json_response(obj: Record<string, any>): PreResponse {
+export function json_response(obj: Record<string, any>, status = 200): PreResponse {
   return {
+    status,
     body: JSON.stringify(obj, null, 2),
     mime_type: MimeTypes.json,
   }

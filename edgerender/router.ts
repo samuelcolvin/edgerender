@@ -13,15 +13,8 @@ export interface RequestContext {
   router: Router
   assets: Assets
 }
-
-export enum Method {
-  get = 'GET',
-  post = 'POST',
-  put = 'PUT',
-  patch = 'PATCH',
-  delete = 'DELETE',
-  options = 'OPTIONS',
-}
+const MethodStrings = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
+type Method = typeof MethodStrings[number]
 
 type ResponseTypes = PreResponse | Response | JsxChunk
 type ViewReturnType = ResponseTypes | Promise<ResponseTypes>
@@ -138,7 +131,7 @@ export class Router {
 
       if (!view.allow.has(method)) {
         const allow = [...view.allow].join(',')
-        const msg = `${method}: Method Not Allowed (allowed: ${allow})`
+        const msg = `"${method}" Method Not Allowed (allowed: ${allow})`
         throw new HttpError(405, msg, {allow})
       }
 
@@ -197,14 +190,22 @@ const clean_path = (pathname: string): string => pathname.replace(/\/+$/, '') ||
 function as_path_view([key, view]: [string, View | ViewFunction]): PathView {
   const path = parse_path(key)
   if (typeof view == 'function') {
-    return {path, view, allow: new Set([Method.get])}
+    return {path, view, allow: new Set(['GET'])}
   } else {
     let allow: Set<Method>
-    if (typeof view.allow == 'string') {
+    if (view.allow == undefined) {
+      allow = new Set(['GET'])
+    } else if (typeof view.allow == 'string') {
       allow = new Set([view.allow])
     } else {
       allow = new Set(view.allow)
     }
+
+    const invalid = [...allow].filter(m => !MethodStrings.includes(m))
+    if (invalid.length) {
+      throw new Error(`"${invalid.join(', ')}" is not a valid method, should be: ${MethodStrings.join(', ')}`)
+    }
+
     return {path, view: view.view, allow}
   }
 }
