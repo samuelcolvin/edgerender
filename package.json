@@ -11,8 +11,18 @@
     "test": "jest --config jest.config.js --verbose",
     "all": "yarn lint && yarn test"
   },
-  "author": "author",
+  "author": "Samuel Colvin",
   "license": "MIT",
+  "homepage": "https://github.com/samuelcolvin/edgerender",
+  "private": false,
+  "keywords": [
+    "react",
+    "edge",
+    "edgerender",
+    "SSR",
+    "CloudFlare-Workers",
+    "webpack"
+  ],
   "eslintConfig": {
     "root": true,
     "parserOptions": {

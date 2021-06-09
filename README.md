@@ -1,6 +1,13 @@
 # edgerender
 
-[![ci](https://github.com/samuelcolvin/edgerender-experiment/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/samuelcolvin/edgerender-experiment/actions?query=branch%3Amain)
-[![codecov](https://codecov.io/gh/samuelcolvin/edgerender-experiment/branch/main/graph/badge.svg?token=bFqXZ0Ovwm)](https://codecov.io/gh/samuelcolvin/edgerender-experiment)
+[![ci](https://github.com/samuelcolvin/edgerender/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/samuelcolvin/edgerender/actions?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/samuelcolvin/edgerender/branch/main/graph/badge.svg)](https://codecov.io/gh/samuelcolvin/edgerender)
 
-experiment
+**An Experiment.**
+
+Rendering websites on the server sucks.
+
+Rendering websites on the browser sucks.
+
+So why not render them on the edge?
+
