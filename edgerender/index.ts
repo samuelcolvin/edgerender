@@ -1,5 +1,5 @@
 import {ChildType, classNameType, JsxChunk, Key} from './render'
-export {Router, Views} from './router'
+export {Router, Views} from './handle'
 export {AssetConfig} from './assets'
 
 export async function render_jsx(jsx_element: JSX.Element): Promise<string> {
