@@ -111,6 +111,8 @@ declare global {
        */
       is?: string
 
+      data?: Record<string, any>
+
       // htmx attributes https://htmx.org/docs/#ajax
       hxGet?: string
       hxPost?: string

@@ -45,6 +45,10 @@ const components: ComponentTest[] = [
     expected: '<input class="foo bar">',
   },
   {
+    component: () => <div data={{foo: '<bar"', spam: 123, html: raw_html('"xxx"')}}>whatever</div>,
+    expected: '<div data-foo="&lt;bar&quot;" data-spam="123" data-html=\'"xxx"\'>whatever</div>',
+  },
+  {
     component: ({thing}) => <div id="123">{raw_html(thing)}</div>,
     args: {thing: '<b>new</b>'},
     expected: '<div id="123"><b>new</b></div>',
@@ -73,7 +77,7 @@ const components: ComponentTest[] = [
   },
   {
     component: () => (
-      <span id={raw_html('"thing"') as any} hxGet="foobar">
+      <span id={raw_html('"thing"')} hxGet="foobar">
         thing
       </span>
     ),
