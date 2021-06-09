@@ -45,11 +45,13 @@ class MockResponse {
   protected readonly content: string
   readonly status: number
   readonly headers: Headers
+  readonly _request: any
 
-  constructor(content: string, headers: Record<string, string>, status = 200) {
+  constructor(content: string, headers: Record<string, string>, status: number, request: any) {
     this.content = content
     this.status = status
     this.headers = new Headers(headers)
+    this._request = request
   }
 
   async blob(): Promise<any> {
@@ -57,10 +59,11 @@ class MockResponse {
   }
 }
 
-export async function mock_fetch(url: string, _init: any): Promise<MockResponse> {
+export async function mock_fetch(url: string, init: any): Promise<MockResponse> {
+  const request = {url, ...(init || {})}
   if (url == 'https://example.com/') {
-    return new MockResponse('<h1>response to example.com</h1>', {'content-type': 'text/html'})
+    return new MockResponse('<h1>response to example.com</h1>', {'content-type': 'text/html'}, 200, request)
   } else {
-    return new MockResponse('404 response', {'content-type': 'text/plain'}, 404)
+    return new MockResponse('404 response', {'content-type': 'text/plain'}, 404, request)
   }
 }

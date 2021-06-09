@@ -4,7 +4,7 @@ export default class Sentry {
   readonly release?: string
   readonly environment: string
 
-  constructor(dsn: string, environment = 'production', release: string | undefined) {
+  constructor(dsn: string, environment: string | undefined, release: string | undefined = undefined) {
     const m = dsn.match(/^https:\/\/(.+?)@(.+?)\.ingest\.sentry\.io\/(.+)/)
     const [, sentry_key, , sentry_app] = m as RegExpMatchArray
     this.sentry_key = sentry_key
@@ -60,7 +60,7 @@ export default class Sentry {
     )
     sentry_data.extra.cloudflare = request.cf
 
-    console.log('sentry data:', sentry_data)
+    // console.log('sentry data:', sentry_data)
 
     // if (this.release) {
     //   defaults.release = this.release
@@ -120,12 +120,23 @@ function get_frames(stack: string | undefined): Frame[] {
     .reverse()
     .filter(line => line.match(/^ {4}at /))
     .map(line => {
-      let filename, func, lineno, colno
-      const m1 = line.match(/^ +at (\S+) \((.+?):(\d+):(\d+)\)/)
+      let filename = '__unknown.js'
+      let func: string | undefined = undefined
+      let lineno = '0'
+      let colno = '0'
+      const m1 = line.match(/^ +at (.+?) \((.+?):(\d+):(\d+)\)/)
       if (m1) {
         ;[, func, filename, lineno, colno] = m1
       } else {
-        ;[, filename, lineno, colno] = line.match(/^ +at (.+?):(\d+):(\d+)/)
+        const m2 = line.match(/^ +at (.+?):(\d+):(\d+)/)
+        if (m2) {
+          ;[, filename, lineno, colno] = m2
+        } else {
+          const m3 = line.match(/^ +at (.+?) \(/)
+          if (m3) {
+            func = m3[1]
+          }
+        }
       }
       return {
         in_app: true,

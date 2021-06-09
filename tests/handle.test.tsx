@@ -23,6 +23,9 @@ const views: Views = {
     allow: ['GET', 'POST'],
     view: ({request}) => json_response({method: request.method}, 201),
   },
+  '/error/': () => {
+    throw new Error('intentional error')
+  },
 }
 const router = new Router({views})
 
@@ -93,6 +96,20 @@ describe('handle', () => {
     const response = await router.handle(event)
     expect(response.status).toEqual(405)
     expect(await response.text()).toEqual('405: "PATCH" Method Not Allowed (allowed: GET,POST)')
+  })
+
+  test('error', async () => {
+    const errors: any[] = []
+    console.error = (...args) => {
+      errors.push(args)
+    }
+
+    const event = new FetchEvent('fetch', {request: new Request('/error/')})
+    const response = await router.handle(event)
+    expect(response.status).toEqual(500)
+    expect(await response.text()).toEqual('Edge Server Error')
+    expect(errors.length).toEqual(1)
+    expect(errors[0][0]).toEqual('error handling request:')
   })
 
   test('assets-404', async () => {
