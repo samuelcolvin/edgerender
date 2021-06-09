@@ -1,9 +1,14 @@
 {
   "name": "edgerender",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Render at the edge",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/jsx-types.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "prepublish": "tsc --build tsconfig.build.json",
     "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.ts' 'tests/**/*.{ts,tsx}'",

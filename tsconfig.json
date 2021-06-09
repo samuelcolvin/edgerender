@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./test-dist",
     "jsx": "react-jsx",
     "jsxImportSource": "edgerender",
     "module": "commonjs",
@@ -12,7 +12,6 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "esModuleInterop": true,
-    "declaration": true,
     "baseUrl": ".",
     "paths": {
       "edgerender": ["edgerender"],

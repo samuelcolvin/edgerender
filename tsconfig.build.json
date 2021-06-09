@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "jsx": "react-jsx",
-    "jsxImportSource": "edgerender",
     "module": "commonjs",
     "target": "esnext",
     "lib": ["esnext", "webworker"],
@@ -13,12 +11,7 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": true,
-    "baseUrl": ".",
-    "paths": {
-      "edgerender": ["edgerender"],
-      "edgerender/*": ["edgerender/*"]
-    },
-    "types": ["@cloudflare/workers-types", "@types/jest"]
+    "types": ["@cloudflare/workers-types"]
   },
   "include": ["edgerender"],
   "exclude": ["node_modules", "dist", "tests"]
