@@ -2,7 +2,7 @@ const path = require('path')
 const sass = require('sass')
 
 // webpack loader for sass to include map files, see https://github.com/webpack/webpack/discussions/13505
-module.exports = async function() {
+module.exports = async function () {
   const {resourcePath, emitFile, async} = this
   const callback = async()
   const output_name = path.parse(resourcePath).base.replace(/\.s[ac]ss$/, '.css')
