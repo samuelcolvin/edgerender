@@ -1,5 +1,5 @@
 import * as CSS from 'csstype'
-import {JsxChunk, classNameType} from './render'
+import {JsxChunk, classNameType} from './jsx'
 
 export {}
 

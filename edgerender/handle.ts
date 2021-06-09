@@ -1,8 +1,8 @@
 import {HttpError, MimeTypes, default_security_headers, PreResponse} from './response'
 import Sentry from './sentry'
-import {JsxChunk} from './render'
+import {JsxChunk} from './jsx'
 import {Assets, AssetConfig} from './assets'
-import {escape_regex} from './utils'
+import {PathView, Method, as_path_view, clean_path} from './request'
 
 export interface RequestContext {
   request: Request
@@ -13,8 +13,6 @@ export interface RequestContext {
   router: Router
   assets: Assets
 }
-const MethodStrings = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
-type Method = typeof MethodStrings[number]
 
 type ResponseTypes = PreResponse | Response | JsxChunk
 type ViewReturnType = ResponseTypes | Promise<ResponseTypes>
@@ -37,12 +35,6 @@ export interface RouterConfig {
   sentry_environment?: string
   assets?: AssetConfig
   security_headers?: Record<string, string>
-}
-
-interface PathView {
-  path: RegExp | string
-  allow: Set<Method>
-  view: ViewFunction
 }
 
 export class Router {
@@ -182,75 +174,5 @@ export class Router {
     const status = r.status || 200
     const headers = {'Content-Type': r.mime_type, ...this.security_headers, ...(r.headers || {})}
     return new Response(r.body, {status, headers})
-  }
-}
-
-const clean_path = (pathname: string): string => pathname.replace(/\/+$/, '') || '/'
-
-function as_path_view([key, view]: [string, View | ViewFunction]): PathView {
-  const path = parse_path(key)
-  if (typeof view == 'function') {
-    return {path, view, allow: new Set(['GET'])}
-  } else {
-    let allow: Set<Method>
-    if (view.allow == undefined) {
-      allow = new Set(['GET'])
-    } else if (typeof view.allow == 'string') {
-      allow = new Set([view.allow])
-    } else {
-      allow = new Set(view.allow)
-    }
-
-    const invalid = [...allow].filter(m => !MethodStrings.includes(m))
-    if (invalid.length) {
-      throw new Error(`"${invalid.join(', ')}" is not a valid method, should be: ${MethodStrings.join(', ')}`)
-    }
-
-    return {path, view: view.view, allow}
-  }
-}
-
-const group_regex = /{(\w+)(?::(.+?))?}([^{]*)/g
-
-// function parse_path(path: string): string | RegExp {
-function parse_path(path: string): string | RegExp {
-  if (!path.startsWith('/')) {
-    path = '/' + path
-  }
-  if (!path.includes('{')) {
-    if (path.includes('}')) {
-      throw new Error(`invalid path "${path}", "}" with no matching start "{"`)
-    } else {
-      return clean_path(path)
-    }
-  }
-
-  let regex_str = ''
-  let first = true
-  let last_ended = 0
-  for (const m of path.matchAll(group_regex)) {
-    if (first) {
-      regex_str += escape_regex(path.substr(0, m.index))
-      first = false
-    }
-    regex_str += `(?<${m[1]}>${get_regex(m[2])})${escape_regex(m[3])}`
-    last_ended = (m.index || 0) + m[0].length
-  }
-  if (last_ended != path.length) {
-    throw new Error(`invalid path, match expression "${path}" can't be interpreted`)
-  }
-  regex_str = `^${clean_path(regex_str)}$`
-  return new RegExp(regex_str)
-}
-
-const word_regex = '[\\w\\-]+'
-
-function get_regex(group: string | undefined): string {
-  if (!group || group == 'word') {
-    return word_regex
-  } else if (group == 'int') {
-    return '\\d+'
-  } else {
-    return group
   }
 }

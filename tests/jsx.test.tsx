@@ -1,6 +1,5 @@
 import each from 'jest-each'
-import {Component, JsxChunk} from 'edgerender/render'
-import {render_jsx, raw_html, CustomTag} from 'edgerender'
+import {Component, JsxChunk, raw_html, CustomTag, render_jsx} from 'edgerender/jsx'
 
 describe('jsx', () => {
   test('render', async () => {
