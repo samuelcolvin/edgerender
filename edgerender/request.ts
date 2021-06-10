@@ -13,26 +13,25 @@ export interface PathView {
 export const clean_path = (pathname: string): string => pathname.replace(/\/+$/, '') || '/'
 
 export function as_path_view([key, view]: [string, View | ViewFunction]): PathView {
-  const path = parse_path(key)
   if (typeof view == 'function') {
-    return {path, view, allow: new Set(['GET'])}
-  } else {
-    let allow: Set<Method>
-    if (view.allow == undefined) {
-      allow = new Set(['GET'])
-    } else if (typeof view.allow == 'string') {
-      allow = new Set([view.allow])
-    } else {
-      allow = new Set(view.allow)
-    }
-
-    const invalid = [...allow].filter(m => !MethodStrings.includes(m))
-    if (invalid.length) {
-      throw new Error(`"${invalid.join(', ')}" is not a valid method, should be: ${MethodStrings.join(', ')}`)
-    }
-
-    return {path, view: view.view, allow}
+    view = {view}
   }
+
+  let allow: Set<Method>
+  if (view.allow == undefined) {
+    allow = new Set(['GET'])
+  } else if (typeof view.allow == 'string') {
+    allow = new Set([view.allow])
+  } else {
+    allow = new Set(view.allow)
+  }
+
+  const invalid = [...allow].filter(m => !MethodStrings.includes(m))
+  if (invalid.length) {
+    throw new Error(`${invalid.join(', ')} is not a valid method, should be: ${MethodStrings.join(', ')}`)
+  }
+
+  return {path: parse_path(key), view: view.view, allow}
 }
 
 const group_regex = /{(\w+)(?::(.+?))?}([^{]*)/g

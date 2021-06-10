@@ -17,7 +17,7 @@ export const default_security_headers: Record<string, string> = {
 export interface PreResponse {
   status?: number
   body: string | ReadableStream | ArrayBuffer
-  mime_type: MimeTypes
+  mime_type: MimeTypes | string
   headers?: Record<string, string>
 }
 
