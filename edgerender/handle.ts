@@ -10,7 +10,7 @@ export interface RequestContext {
   url: URL
   match: Record<string, string>
   is_htmx: boolean
-  router: Router
+  edge_render: EdgeRender
   assets: Assets
 }
 
@@ -26,7 +26,7 @@ export type Views = Record<string, View | ViewFunction>
 type Page = (children: JsxChunk, context: RequestContext) => JsxChunk | Promise<JsxChunk>
 
 // TODO csp
-export interface RouterConfig {
+export interface EdgeRenderConfig {
   views: Views
   page?: Page
   debug?: boolean
@@ -37,7 +37,9 @@ export interface RouterConfig {
   security_headers?: Record<string, string>
 }
 
-export class Router {
+export const edge_render = (edge_render_config: EdgeRenderConfig): EdgeRender => new EdgeRender(edge_render_config)
+
+export class EdgeRender {
   readonly views: PathView[]
   readonly page?: Page
   readonly debug: boolean
@@ -45,7 +47,7 @@ export class Router {
   readonly assets: Assets
   readonly security_headers: Record<string, string>
 
-  constructor(config: RouterConfig) {
+  constructor(config: EdgeRenderConfig) {
     this.views = Object.entries(config.views).map(as_path_view)
     this.page = config.page
     this.debug = config.debug || false
@@ -133,7 +135,7 @@ export class Router {
         url,
         match,
         is_htmx,
-        router: this,
+        edge_render: this,
         assets: this.assets,
       }
       let result: ResponseTypes = await Promise.resolve(view.view(context))
@@ -156,7 +158,7 @@ export class Router {
       url,
       match: {},
       is_htmx,
-      router: this,
+      edge_render: this,
       assets: this.assets,
     })
   }

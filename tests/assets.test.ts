@@ -1,5 +1,5 @@
 import makeServiceWorkerEnv from 'service-worker-mock'
-import {Router, Views} from 'edgerender'
+import {EdgeRender, Views} from 'edgerender'
 import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
 
@@ -24,7 +24,7 @@ const views: Views = {
   '/': () => ({body: 'index', mime_type: MimeTypes.plaintext}),
   '/cache-proxy': ({request, assets}) => assets.cached_proxy(request, 'https://example.com/'),
 }
-const router = new Router({views, assets})
+const router = new EdgeRender({views, assets})
 let warnings: any[] = []
 
 describe('handle', () => {
@@ -89,7 +89,7 @@ describe('handle', () => {
     const assets: AssetConfig = {content_manifest: JSON.stringify(manifest)}
 
     const views: Views = {'/': () => ({body: 'index', mime_type: MimeTypes.plaintext})}
-    const router = new Router({views, assets})
+    const router = new EdgeRender({views, assets})
 
     const event = new FetchEvent('fetch', {request: new Request('/assets/favicon.ico')})
     const response = await router.handle(event)
@@ -105,7 +105,7 @@ describe('handle', () => {
     const assets: AssetConfig = {content_manifest: JSON.stringify(manifest)}
 
     const views: Views = {'/': () => ({body: 'index', mime_type: MimeTypes.plaintext})}
-    const router = new Router({views, assets})
+    const router = new EdgeRender({views, assets})
 
     await expect(router.assets.cached_proxy(new Request('/'), 'https://example.com')).rejects.toThrow(
       'KV namespace not defined, static assets not available',

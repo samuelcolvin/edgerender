@@ -1,5 +1,5 @@
 import makeServiceWorkerEnv from 'service-worker-mock'
-import {Router, Views} from 'edgerender'
+import {edge_render, Views} from 'edgerender'
 import {json_response} from 'edgerender/response'
 
 declare const global: any
@@ -27,7 +27,7 @@ const views: Views = {
     throw new Error('intentional error')
   },
 }
-const router = new Router({views})
+const router = edge_render({views})
 
 describe('handle', () => {
   beforeEach(() => {

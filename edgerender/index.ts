@@ -1,5 +1,5 @@
 import type {Properties as CssProperties} from 'csstype'
-export {Router, Views} from './handle'
+export {edge_render, EdgeRender, EdgeRenderConfig, Views} from './handle'
 export {AssetConfig} from './assets'
 import {JsxChunk, classNameType} from './jsx'
 
