@@ -36,7 +36,7 @@ export class RawHtml {
   }
 }
 
-export const raw_html = (html: string): RawHtml => new RawHtml(html)
+export const raw_html = (html: string): string => new RawHtml(html) as any
 
 const EmptyTags = new Set([
   'area',
@@ -119,37 +119,39 @@ export class JsxChunk {
 
 function render_attr(name: string, value: any): string {
   let attr_value: string | null = null
-  let quote = '"'
+  const value_type = smart_typeof(value)
 
   if (name == 'style') {
     attr_value = render_styles(value)
   } else if (name == 'className') {
-    attr_value = render_class(value)
-  } else {
-    switch (smart_typeof(value)) {
-      case SmartType.String:
-        attr_value = HtmlEscape.attr_double(value)
-        break
-      case SmartType.Boolean:
-        if (value === true) {
-          return ` ${get_tag_name(name)}`
-        } else {
-          attr_value = null
-        }
-        break
-      case SmartType.RawHtml:
-        attr_value = (value as RawHtml).html
-        quote = attr_value.indexOf('"') == -1 ? '"' : "'"
-        break
-      default:
-        attr_value = HtmlEscape.attr_single(JSON.stringify(value))
-        quote = "'"
+    attr_value = render_class(value, value_type)
+  } else if (name == 'data' && value_type == SmartType.Object) {
+    return render_data(value as Record<string, any>)
+  } else if (value_type == SmartType.Boolean) {
+    if (value === true) {
+      return ` ${get_tag_name(name)}`
+    } else {
+      attr_value = null
     }
+  } else {
+    attr_value = render_attr_value(value, value_type)
   }
   if (attr_value == null) {
     return ''
   } else {
+    const quote = attr_value.includes('"') ? "'" : '"'
     return ` ${get_tag_name(name)}=${quote}${attr_value}${quote}`
+  }
+}
+
+function render_attr_value(value: any, value_type: SmartType) {
+  switch (value_type) {
+    case SmartType.String:
+      return HtmlEscape.attr_double(value)
+    case SmartType.RawHtml:
+      return (value as RawHtml).html
+    default:
+      return HtmlEscape.attr_single(JSON.stringify(value))
   }
 }
 
@@ -196,9 +198,8 @@ async function cat_array(child: ChildType[]): Promise<string> {
   return results.join('')
 }
 
-function render_class(value: classNameType): string {
+function render_class(value: classNameType, value_type: SmartType): string {
   const classNames: string[] = []
-  const value_type = smart_typeof(value)
   switch (value_type) {
     case SmartType.String:
       return value as string
@@ -220,4 +221,15 @@ function render_class(value: classNameType): string {
       throw new TypeError(`unexpected type passed to className: "${value_type}", should be string, list or object`)
   }
   return classNames.join(' ')
+}
+
+function render_data(data: Record<string, any>): string {
+  let result = ''
+  for (const [key, value] of Object.entries(data)) {
+    const clean_name = key.replace(/[^\w-]/g, '')
+    const attr_value: string = render_attr_value(value, smart_typeof(value))
+    const quote = attr_value.includes('"') ? "'" : '"'
+    result += ` data-${clean_name}=${quote}${attr_value}${quote}`
+  }
+  return result
 }

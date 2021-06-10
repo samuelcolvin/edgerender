@@ -2,7 +2,7 @@ const path = require('path')
 const sass = require('sass')
 
 // webpack loader for sass to include map files, see https://github.com/webpack/webpack/discussions/13505
-async function sass_loader() {
+module.exports = async function () {
   const {resourcePath, emitFile, async} = this
   const callback = async()
   const output_name = path.parse(resourcePath).base.replace(/\.s[ac]ss$/, '.css')
@@ -26,43 +26,4 @@ async function sass_loader() {
       }
     },
   )
-}
-
-module.exports = {
-  output: {
-    filename: 'worker.js',
-    path: path.join(__dirname, 'dist'),
-    publicPath: '/',
-    assetModuleFilename: 'assets/[name].[hash][ext][query]',
-    clean: true,
-  },
-  devtool: false,
-  mode: 'development',
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
-    modules: ['edgerender', 'node_modules'],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        loader: 'ts-loader',
-        options: {
-          // transpileOnly: true,
-        },
-      },
-      {
-        test: /\.s[ac]ss$/i,
-        type: 'asset/resource',
-        generator: {
-          filename: 'assets/[name].[hash].css[query]',
-        },
-        loader: sass_loader,
-      },
-      {
-        test: /\.(css|png|ico|jpe?g|svg|woff2?|ttf)$/i,
-        type: 'asset/resource',
-      },
-    ],
-  },
 }

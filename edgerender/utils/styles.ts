@@ -1,6 +1,6 @@
-import * as CSS from 'csstype'
+import type {Properties} from 'csstype'
 
-export function render_styles(styles: CSS.Properties): string | null {
+export function render_styles(styles: Properties): string | null {
   let serialized = ''
   let delimiter = ''
   for (const [name, value] of Object.entries(styles)) {

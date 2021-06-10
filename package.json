@@ -1,20 +1,14 @@
 {
   "name": "edgerender",
-  "version": "0.0.4",
+  "version": "0.0.9",
   "description": "Render at the edge",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist/**/*",
-    "README.md",
-    "LICENSE"
-  ],
+  "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "tsc": "tsc --build tsconfig.build.json",
-    "copy": "cp edgerender/*.d.ts dist/ && cp edgerender/webpack.config.js dist/",
-    "prepublish": "yarn tsc && yarn copy",
-    "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.ts' 'tests/**/*.{ts,tsx}'",
-    "lint": "eslint --max-warnings=0 edgerender && prettier --check '*.{json,js,toml}' 'edgerender/**/*.ts' 'tests/**/*.{ts,tsx}'",
+    "build": "rm -rf dist && yarn tsc && cp -r edgerender/webpack dist/ && cp README.md LICENSE package.json dist/",
+    "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
+    "lint": "eslint --max-warnings=0 edgerender && prettier --check '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
     "test": "jest --config jest.config.js --verbose",
     "all": "yarn lint && yarn test"
   },
@@ -23,11 +17,13 @@
   "homepage": "https://github.com/samuelcolvin/edgerender",
   "private": false,
   "keywords": [
-    "react",
+    "jsx",
     "edge",
     "edgerender",
     "SSR",
     "CloudFlare-Workers",
+    "typescript",
+    "react",
     "webpack"
   ],
   "eslintConfig": {
