@@ -84,11 +84,11 @@ export default class Sentry {
 }
 
 interface Frame {
-  in_app: boolean
+  in_app: true
   filename: string
-  function: string | undefined
-  lineno: number
-  colno: number
+  function: string
+  lineno?: number
+  colno?: number
 }
 
 interface SentryData {
@@ -119,31 +119,30 @@ function get_frames(stack: string | undefined): Frame[] {
   return lines
     .reverse()
     .filter(line => line.match(/^ {4}at /))
-    .map(line => {
-      let filename = '__unknown.js'
-      let func: string | undefined = undefined
-      let lineno = '0'
-      let colno = '0'
-      const m1 = line.match(/^ +at (.+?) \((.+?):(\d+):(\d+)\)/)
-      if (m1) {
-        ;[, func, filename, lineno, colno] = m1
-      } else {
-        const m2 = line.match(/^ +at (.+?):(\d+):(\d+)/)
-        if (m2) {
-          ;[, filename, lineno, colno] = m2
-        } else {
-          const m3 = line.match(/^ +at (.+?) \(/)
-          if (m3) {
-            func = m3[1]
-          }
-        }
-      }
-      return {
+    .map(extract_frame)
+}
+
+const frame_regexes: RegExp[] = [
+  /^ +at (?<func>.+?) \((?<filename>.+?):(?<lineno>\d+):(?<colno>\d+)\)/,
+  /^ +at (?<func>.+?):(?<lineno>\d+):(?<colno>\d+)/,
+  /^ +at (?<func>.+?) \(/,
+]
+
+function extract_frame(line: string): Frame {
+  for (const regex of frame_regexes) {
+    const m = line.match(regex)
+    if (m) {
+      const {func, filename, lineno, colno} = m.groups as Record<string, string>
+      const f = {
         in_app: true,
-        filename: '~/' + filename,
+        filename: `~/${filename || '__unknown__.js'}`,
         function: func,
-        lineno: parseInt(lineno),
-        colno: parseInt(colno),
       }
-    })
+      if (lineno) {
+        Object.assign(f, {lineno: parseInt(lineno), colno: parseInt(colno)})
+      }
+      return f as Frame
+    }
+  }
+  throw Error(`no frame found in stack line: "${line}"`)
 }
