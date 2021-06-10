@@ -1,12 +1,12 @@
 {
   "name": "edgerender",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "Render at the edge",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "tsc": "tsc --build tsconfig.build.json",
-    "build": "rm -rf dist && cp -r edgerender dist && cp README.md LICENSE package.json dist/",
+    "build": "rm -rf dist && yarn tsc && cp -r edgerender/webpack dist/ && cp README.md LICENSE package.json dist/",
     "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
     "lint": "eslint --max-warnings=0 edgerender && prettier --check '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
     "test": "jest --config jest.config.js --verbose",
@@ -17,11 +17,13 @@
   "homepage": "https://github.com/samuelcolvin/edgerender",
   "private": false,
   "keywords": [
-    "react",
+    "jsx",
     "edge",
     "edgerender",
     "SSR",
     "CloudFlare-Workers",
+    "typescript",
+    "react",
     "webpack"
   ],
   "eslintConfig": {

@@ -1,4 +1,4 @@
-export enum SmartType {
+export const enum SmartType {
   Null = 'Null',
   Undefined = 'Undefined',
   Number = 'Number',
