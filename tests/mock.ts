@@ -20,10 +20,12 @@ export class MockKvNamespace {
     return this as any
   }
 
-  async get(key: string, type: 'string' | 'arrayBuffer' = 'string'): Promise<string | undefined> {
+  async get(key: string, type: 'string' | 'arrayBuffer' = 'string'): Promise<string | null> {
     const v = await this.getWithMetadata(key, type)
     if (v) {
-      return v.value
+      return v.value || null
+    } else {
+      return null
     }
   }
 

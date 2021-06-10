@@ -1,6 +1,6 @@
 import makeServiceWorkerEnv from 'service-worker-mock'
 import {Router, Views} from 'edgerender'
-import {MimeTypes} from 'edgerender/response'
+import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
 
 import {MockKvNamespace, mock_fetch} from './mock'
@@ -11,6 +11,7 @@ const manifest = {
   'foobar.png': 'foobar_png',
   'favicon.ico': 'favicon_ico',
   'thing.not-known-type': 'splat',
+  'not-in-kv.png': 'not_in_kv_png',
 }
 
 const kv_namespace = new MockKvNamespace()
@@ -82,5 +83,58 @@ describe('handle', () => {
     expect(response2.status).toEqual(200)
     expect(response2.headers.get('content-type')).toEqual('text/html')
     expect(await response2.text()).toEqual('<h1>response to example.com</h1>')
+  })
+
+  test('no-kv_namespace', async () => {
+    const assets: AssetConfig = {content_manifest: JSON.stringify(manifest)}
+
+    const views: Views = {'/': () => ({body: 'index', mime_type: MimeTypes.plaintext})}
+    const router = new Router({views, assets})
+
+    const event = new FetchEvent('fetch', {request: new Request('/assets/favicon.ico')})
+    const response = await router.handle(event)
+    expect(response.status).toEqual(404)
+    expect(await response.text()).toEqual('404: static asset "/assets/favicon.ico" not found')
+    expect(warnings).toStrictEqual([
+      ['KV namespace not defined, static assets not available'],
+      ['HTTP Error 404: static asset "/assets/favicon.ico" not found'],
+    ])
+  })
+
+  test('no-kv_namespace-cached_proxy', async () => {
+    const assets: AssetConfig = {content_manifest: JSON.stringify(manifest)}
+
+    const views: Views = {'/': () => ({body: 'index', mime_type: MimeTypes.plaintext})}
+    const router = new Router({views, assets})
+
+    await expect(router.assets.cached_proxy(new Request('/'), 'https://example.com')).rejects.toThrow(
+      'KV namespace not defined, static assets not available',
+    )
+  })
+
+  test('cached_proxy', async () => {
+    const r1 = await router.assets.cached_proxy(new Request('/'), 'https://example.com/')
+    expect(r1.status).toEqual(undefined)
+    expect(r1.body).toEqual('<h1>response to example.com</h1>')
+    expect(r1.mime_type).toEqual('text/html')
+
+    await expect(router.assets.cached_proxy(new Request('/'), 'https://missing.com/')).rejects.toThrow(
+      new HttpError(502, 'Error getting "https://missing.com/", upstream response: 404'),
+    )
+  })
+
+  test('not-in-kv.png', async () => {
+    const errors: any[] = []
+    console.error = (...args) => {
+      errors.push(args)
+    }
+    const event = new FetchEvent('fetch', {request: new Request('/assets/not-in-kv.png')})
+    const response = await router.handle(event)
+    expect(response.status).toEqual(404)
+    expect(await response.text()).toEqual('404: static asset "/assets/not-in-kv.png" not found')
+    expect(warnings).toStrictEqual([['HTTP Error 404: static asset "/assets/not-in-kv.png" not found']])
+    expect(errors).toStrictEqual([
+      ['content_key "not_in_kv_png" found for asset_path "/assets/not-in-kv.png", but no value in the KV store'],
+    ])
   })
 })

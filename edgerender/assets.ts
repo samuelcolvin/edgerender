@@ -53,7 +53,7 @@ export class Assets {
     }
 
     if (this.kv_namespace == undefined) {
-      console.warn(`KV namespace not defined, static assets not available`)
+      console.warn('KV namespace not defined, static assets not available')
       throw this.not_found_error(pathname)
     }
 
