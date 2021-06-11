@@ -1,4 +1,4 @@
-import {Blob} from './blob'
+import Blob from './blob'
 
 export function throwBodyUsed(name: string): void {
   throw new TypeError(`Failed to execute "${name}": body is already used`)
@@ -8,8 +8,8 @@ export default class Body {
   protected readonly _body_content: string | Blob | undefined
   protected _bodyUsed: boolean
 
-  constructor(body_content: string | Blob | undefined) {
-    this._body_content = body_content
+  constructor(body_content: string | Blob | undefined | null) {
+    this._body_content = body_content || undefined
     this._bodyUsed = false
   }
 

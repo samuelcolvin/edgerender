@@ -1,7 +1,7 @@
 // stubs https://developer.mozilla.org/en-US/docs/Web/API/Request
-import Headers from './Headers'
+import Headers, {as_headers} from './Headers'
 import Body, {throwBodyUsed} from './Body'
-import {Blob} from './blob'
+import Blob from './blob'
 import {RequestCf, example_cf} from './RequestCf'
 
 const DEFAULT_HEADERS = {
@@ -46,8 +46,9 @@ export default class Request extends Body {
     }
     super(init.body)
 
+    let url: string
     if (urlOrRequest instanceof Request) {
-      this.url = urlOrRequest.url
+      url = urlOrRequest.url
       init = {
         body: urlOrRequest._body_content,
         credentials: urlOrRequest.credentials,
@@ -58,8 +59,9 @@ export default class Request extends Body {
         ...init,
       }
     } else {
-      this.url = urlOrRequest || '/'
+      url = urlOrRequest || '/'
     }
+    this.url = 'https://example.com' + url
     this.method = method
     this.mode = init.mode || 'same-origin'
     this.cache = init.cache || 'default'
@@ -70,16 +72,7 @@ export default class Request extends Body {
     this.integrity = init.integrity || null
     this.cf = example_cf()
 
-    // Transform init.headers to Headers object
-    if (init.headers) {
-      if (init.headers instanceof Headers) {
-        this.headers = init.headers
-      } else {
-        this.headers = new Headers(init.headers)
-      }
-    } else {
-      this.headers = new Headers(DEFAULT_HEADERS)
-    }
+    this.headers = as_headers(init.headers, DEFAULT_HEADERS)
   }
 
   clone(): Request {

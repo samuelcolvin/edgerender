@@ -1,3 +1,3 @@
 // https://w3c.github.io/FileAPI/#dom-blob-blob
-
-export {Blob} from 'buffer'
+import {Blob} from 'buffer'
+export default Blob

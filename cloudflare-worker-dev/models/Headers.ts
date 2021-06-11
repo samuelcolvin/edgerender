@@ -56,3 +56,15 @@ export default class Headers {
     return this.values()
   }
 }
+
+export function as_headers(h: Record<string, string> | Headers | undefined, default_headers: Record<string, string> = {}): Headers {
+  if (h) {
+    if (h instanceof Headers) {
+      return h
+    } else {
+      return new Headers(h)
+    }
+  } else {
+    return new Headers(default_headers)
+  }
+}
