@@ -1,6 +1,6 @@
 // stubs https://developer.mozilla.org/en-US/docs/Web/API/Request
 import Headers, {as_headers} from './Headers'
-import Body, {throwBodyUsed} from './Body'
+import Body from './Body'
 import Blob from './blob'
 import {RequestCf, example_cf} from './RequestCf'
 
@@ -76,10 +76,7 @@ export default class Request extends Body {
   }
 
   clone(): Request {
-    if (this.bodyUsed) {
-      throwBodyUsed('clone')
-    }
-
+    this.check_used('clone')
     return new Request(this.url, {
       method: this.method,
       headers: this.headers,
