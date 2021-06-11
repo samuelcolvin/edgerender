@@ -19,7 +19,7 @@ describe('sentry', () => {
       waitUntil: (p: any): void => {
         promises.push(p)
       },
-      request: new Request('/'),
+      request: new Request('/', {headers: {accept: '*/*', foo: 'bar'}}),
     }
     const error = new Error('broken')
     sentry.captureException(event as any, error)
@@ -33,7 +33,7 @@ describe('sentry', () => {
     expect(body.request).toStrictEqual({
       url: 'https://www.test.com/',
       method: 'GET',
-      headers: {accept: '*/*'},
+      headers: {accept: '*/*', foo: 'bar'},
     })
   })
 })

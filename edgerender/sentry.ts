@@ -1,3 +1,5 @@
+import {as_object} from './utils'
+
 export default class Sentry {
   readonly sentry_key: string
   readonly sentry_app: string
@@ -52,7 +54,7 @@ export default class Sentry {
         request: {
           url: request.url,
           method: request.method,
-          headers: headers_object(request.headers),
+          headers: as_object(request.headers),
         },
         extra: {},
       },
@@ -106,9 +108,6 @@ interface SentryData {
   level?: string
   extra: Record<string, any>
 }
-
-const headers_object = (headers: Headers): Record<string, string> =>
-  Object.assign({}, ...Array.from(headers.entries()).map(([k, v]) => ({[k]: v})))
 
 function get_frames(stack: string | undefined): Frame[] {
   if (!stack) {

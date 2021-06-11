@@ -101,7 +101,7 @@ export class EdgeRender {
     const cleaned_path = clean_path(pathname)
     const is_htmx = request.headers.get('hx-request') == 'true'
     if (this.debug) {
-      console.debug(`${request.method} ${cleaned_path} (cleaned)`)
+      console.debug(`${request.method} ${cleaned_path}`)
     }
 
     if (this.assets && this.assets.is_static_path(pathname)) {
