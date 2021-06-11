@@ -3,7 +3,8 @@ import {EdgeRender, Views} from 'edgerender'
 import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
 
-import {MockKvNamespace, mock_fetch} from './mock'
+import {mock_fetch} from './mock'
+import MockKVNamespace from '../cloudflare-worker-dev/kv_namespace'
 
 declare const global: any
 
@@ -14,9 +15,9 @@ const manifest = {
   'not-in-kv.png': 'not_in_kv_png',
 }
 
-const kv_namespace = new MockKvNamespace()
+const kv_namespace = new MockKVNamespace()
 const assets: AssetConfig = {
-  kv_namespace: kv_namespace.as_kv_namespace(),
+  kv_namespace: kv_namespace as any as KVNamespace,
   content_manifest: JSON.stringify(manifest),
 }
 
@@ -32,7 +33,7 @@ describe('handle', () => {
     Object.assign(global, makeServiceWorkerEnv())
     global.fetch = mock_fetch
     warnings = []
-    kv_namespace.set_keys({
+    kv_namespace._reset({
       foobar_png: {value: 'this is foobar.png'},
       favicon_ico: {value: 'this is favicon.ico'},
       splat: {value: 'splat'},
