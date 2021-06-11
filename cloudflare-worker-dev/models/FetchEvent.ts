@@ -1,14 +1,20 @@
+import Request from './Request'
 
 interface FetchEventInit {
-  request:
+  request: Request
 }
 
 export default class FetchEvent {
   readonly type: 'fetch'
-  readonly init: FetchEventInit
+  request: Request
+  response: Promise<any> | null = null
 
   constructor(type: 'fetch', init: FetchEventInit) {
     this.type = type
-    this.init = init
+    this.request = init.request
+  }
+
+  respondWith(response: any): void {
+    this.response = response
   }
 }

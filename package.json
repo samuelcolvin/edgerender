@@ -7,8 +7,8 @@
   "scripts": {
     "tsc": "tsc --build tsconfig.build.json",
     "build": "rm -rf dist && yarn tsc && cp -r edgerender/webpack dist/ && cp README.md LICENSE package.json dist/",
-    "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
-    "lint": "eslint --max-warnings=0 edgerender && prettier --check '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
+    "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}' 'cloudflare-worker-dev/**/*.{ts,tsx}'",
+    "lint": "eslint --max-warnings=0 edgerender && prettier --check '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'cloudflare-worker-dev/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}'",
     "test": "jest --config jest.config.js --verbose",
     "all": "yarn lint && yarn test"
   },
@@ -54,8 +54,10 @@
     }
   },
   "dependencies": {
+    "@types/node": "^15.12.2",
     "csstype": "^3.0.8",
-    "mime": "^2.5.2"
+    "mime": "^2.5.2",
+    "ts-node": "^10.0.0"
   },
   "peerDependencies": {
     "@cloudflare/workers-types": "^2.2.2",
