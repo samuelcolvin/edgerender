@@ -1,12 +1,8 @@
-import makeServiceWorkerEnv from 'service-worker-mock'
 import {EdgeRender, Views} from 'edgerender'
 import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
-
+import {makeCloudflareEnv, MockKVNamespace} from '../cloudflare-worker-dev'
 import {mock_fetch} from './mock'
-import MockKVNamespace from '../cloudflare-worker-dev/kv_namespace'
-
-declare const global: any
 
 const manifest = {
   'foobar.png': 'foobar_png',
@@ -30,8 +26,7 @@ let warnings: any[] = []
 
 describe('handle', () => {
   beforeEach(() => {
-    Object.assign(global, makeServiceWorkerEnv())
-    global.fetch = mock_fetch
+    makeCloudflareEnv({fetch: mock_fetch})
     warnings = []
     kv_namespace._reset({
       foobar_png: {value: 'this is foobar.png'},

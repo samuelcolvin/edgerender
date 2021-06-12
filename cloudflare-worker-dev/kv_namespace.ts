@@ -3,7 +3,8 @@
 import {TextEncoder, TextDecoder} from 'util'
 
 interface InputValue {
-  value: string | ArrayBuffer, metadata?: Record<string, string>
+  value: string | ArrayBuffer
+  metadata?: Record<string, string>
 }
 
 interface InternalValue {
@@ -21,7 +22,7 @@ type ValueTypeNames = 'text' | 'json' | 'arrayBuffer' | 'stream'
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
-export default class MockKVNamespace {
+export class MockKVNamespace {
   protected kv: Map<string, InternalValue>
 
   constructor(kv: Record<string, InputValue> = {}) {

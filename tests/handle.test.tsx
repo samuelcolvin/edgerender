@@ -1,8 +1,6 @@
 import {edge_render, Views} from 'edgerender'
 import {json_response} from 'edgerender/response'
-import {prepareEnv} from '../cloudflare-worker-dev'
-
-declare const global: any
+import {makeCloudflareEnv} from '../cloudflare-worker-dev'
 
 let warnings: any[] = []
 
@@ -31,7 +29,7 @@ const router = edge_render({views})
 
 describe('handle', () => {
   beforeEach(() => {
-    prepareEnv()
+    makeCloudflareEnv()
     warnings = []
     console.warn = (...args) => {
       warnings.push(args)

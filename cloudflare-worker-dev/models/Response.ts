@@ -2,10 +2,12 @@
 import Blob from './Blob'
 import Body from './Body'
 import Headers, {as_headers} from './Headers'
+import ReadableStream from './ReadableStream'
 
-const validBodyType = (b: any): boolean => b === null || b instanceof Blob || typeof b === 'string'
+const validBodyType = (b: any): boolean =>
+  b === null || b instanceof Blob || b instanceof ReadableStream || typeof b === 'string'
 
-type BodyType = string | Blob | null
+type BodyType = string | Blob | ReadableStream | null
 
 const RedirectStatuses: Set<number> = new Set([301, 302, 303, 307, 308])
 
@@ -27,11 +29,11 @@ export default class Response extends Body {
 
   constructor(body: BodyType = null, init: BodyInit = {}) {
     if (!validBodyType(body)) {
-      throw new TypeError('Response body must be one of: Blob, USVString, null')
+      throw new TypeError('Response body must be one of: Blob, ReadableStream, string, null')
     }
     super(body)
     this.status = init.status || 200
-    this.ok = this.status >= 200 && this.status < 300;
+    this.ok = this.status >= 200 && this.status < 300
     this.statusText = init.statusText || 'OK'
     this.headers = as_headers(init.headers)
 
@@ -43,7 +45,7 @@ export default class Response extends Body {
       status: this.status,
       statusText: this.statusText,
       headers: this.headers,
-      _url: this.url
+      _url: this.url,
     })
   }
 
@@ -55,12 +57,12 @@ export default class Response extends Body {
     return new Response(null, {
       status: status,
       headers: {
-        location: new URL(url).href
-      }
+        location: new URL(url).href,
+      },
     })
   }
 
   static error() {
-    return new Response(null, {status: 0});
+    return new Response(null, {status: 0})
   }
 }

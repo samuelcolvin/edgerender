@@ -3,6 +3,7 @@ import Headers, {as_headers} from './Headers'
 import Body from './Body'
 import Blob from './blob'
 import {RequestCf, example_cf} from './RequestCf'
+import ReadableStream from './ReadableStream'
 
 const DEFAULT_HEADERS = {
   accept: '*/*',
@@ -18,13 +19,13 @@ type CacheType = 'default' | 'reload' | 'no-cache'
 interface RequestInit {
   method?: Method
   headers?: Record<string, string> | Headers
-  body?: string | Blob
+  body?: string | Blob | ReadableStream
   mode?: ModeType
   credentials?: CredentialsType
   cache?: CacheType
   redirect?: 'follow' | 'error' | 'manual'
   referrer?: string
-  integrity?: string | null
+  integrity?: string
 }
 
 export default class Request extends Body {
@@ -35,7 +36,7 @@ export default class Request extends Body {
   readonly cache: CacheType
   readonly redirect: 'follow' | 'error' | 'manual'
   readonly referrer: string
-  readonly integrity: string | null
+  readonly integrity?: string
   readonly headers: Headers
   readonly cf?: RequestCf
 
@@ -69,7 +70,7 @@ export default class Request extends Body {
     // See https://fetch.spec.whatwg.org/#concept-request-credentials-mode
     this.credentials = init.credentials || (this.mode === 'navigate' ? 'include' : 'omit')
     this.redirect = init.redirect || 'follow'
-    this.integrity = init.integrity || null
+    this.integrity = init.integrity
     this.cf = example_cf()
 
     this.headers = as_headers(init.headers, DEFAULT_HEADERS)

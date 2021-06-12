@@ -1,10 +1,11 @@
 import Blob from './blob'
+import ReadableStream from './ReadableStream'
 
 export default class Body {
-  protected readonly _body_content: string | Blob | undefined
+  protected readonly _body_content: string | Blob | ReadableStream | undefined
   protected _bodyUsed: boolean
 
-  constructor(body_content: string | Blob | undefined | null) {
+  constructor(body_content: string | Blob | ReadableStream | undefined | null) {
     this._body_content = body_content || undefined
     this._bodyUsed = false
   }
