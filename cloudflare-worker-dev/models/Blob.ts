@@ -1,15 +1,17 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/Blob
 import {EdgeReadableStream} from './ReadableStream'
 import {encode, decode, catUint8Arrays} from '../utils'
-
-type BlobChunkType = ArrayBuffer | Blob | string
+import {BlobOptions} from 'buffer'
 
 export class EdgeBlob implements Blob {
   protected readonly chunks: Uint8Array[]
   readonly type: string
+  protected readonly encoding: string
 
-  constructor(chunks: BlobChunkType[], options: {type?: string} = {}) {
+  constructor(chunks: BlobPart[], options: BlobOptions = {}) {
     this.chunks = []
+    this.type = options.type || ''
+    this.encoding = options.encoding || 'utf8'  // currently unused
     for (const chunk of chunks) {
       if (chunk instanceof ArrayBuffer) {
         this.chunks.push(new Uint8Array(chunk))
@@ -19,7 +21,6 @@ export class EdgeBlob implements Blob {
         this.chunks.push(encode(chunk as string))
       }
     }
-    this.type = options.type || ''
   }
 
   protected _text(): string {
@@ -43,7 +44,7 @@ export class EdgeBlob implements Blob {
   }
 
   stream(): ReadableStream {
-    return new EdgeReadableStream(this.chunks) // TODO
+    return new EdgeReadableStream(this.chunks)
   }
 
   slice(start = 0, end: number | undefined = undefined, contentType?: string): Blob {

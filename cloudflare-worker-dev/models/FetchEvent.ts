@@ -21,81 +21,80 @@ export class EdgeFetchEvent implements FetchEvent {
   }
 
   // all these values/methods are required to be a valid FetchEvent but are not implemented by FetchEvents
-  // in CloudFlare workers
+  // in CloudFlare workers, hence returning undefined
   get clientId(): string {
-    throw new Error('clientId not implemented')
+    return undefined as any
   }
   get resultingClientId(): string {
-    throw new Error('resultingClientId not implemented')
+    return undefined as any
   }
   get bubbles(): boolean {
-    throw new Error('bubbles not implemented')
+    return undefined as any
   }
   get cancelBubble(): boolean {
-    throw new Error('cancelBubble not implemented')
+    return undefined as any
   }
   get cancelable(): boolean {
-    throw new Error('cancelable not implemented')
+    return undefined as any
   }
   get composed(): boolean {
-    throw new Error('composed not implemented')
+    return undefined as any
   }
   get currentTarget(): EventTarget | null {
-    throw new Error('currentTarget not implemented')
+    return undefined as any
   }
   get defaultPrevented(): boolean {
-    throw new Error('defaultPrevented not implemented')
+    return undefined as any
   }
   get isTrusted(): boolean {
-    throw new Error('isTrusted not implemented')
+    return undefined as any
   }
   get returnValue(): boolean {
-    throw new Error('returnValue not implemented')
+    return undefined as any
   }
   get srcElement(): EventTarget | null {
-    throw new Error('srcElement not implemented')
+    return undefined as any
   }
   get target(): EventTarget | null {
-    throw new Error('target not implemented')
+    return undefined as any
   }
   get timeStamp(): number {
-    throw new Error('timeStamp not implemented')
+    return undefined as any
   }
-
   get eventPhase(): number {
-    throw new Error('eventPhase not implemented')
+    return undefined as any
   }
   get AT_TARGET(): number {
-    throw new Error('AT_TARGET not implemented')
+    return undefined as any
   }
   get BUBBLING_PHASE(): number {
-    throw new Error('BUBBLING_PHASE not implemented')
+    return undefined as any
   }
   get CAPTURING_PHASE(): number {
-    throw new Error('CAPTURING_PHASE not implemented')
+    return undefined as any
   }
   get NONE(): number {
-    throw new Error('NONE not implemented')
-  }
-  initEvent(_type: string, _bubbles?: boolean, _cancelable?: boolean): void {
-    throw new TypeError('initEvent not implemented')
-  }
-  passThroughOnException(): void {
-    throw new TypeError('passThroughOnException not implemented')
+    return undefined as any
   }
   get preloadResponse(): Promise<any> {
-    throw new TypeError('preloadResponse not implemented')
+    return undefined as any
   }
-  composedPath(): EventTarget[] {
-    throw new TypeError('composedPath not implemented')
+  get initEvent(): (_type: string, _bubbles?: boolean, _cancelable?: boolean) => void {
+    return undefined as any
   }
-  preventDefault(): void {
-    throw new TypeError('preventDefault not implemented')
+  get passThroughOnException(): () => void {
+    return undefined as any
   }
-  stopImmediatePropagation(): void {
-    throw new TypeError('stopImmediatePropagation not implemented')
+  get composedPath(): () => EventTarget[] {
+    return undefined as any
   }
-  stopPropagation(): void {
-    throw new TypeError('stopPropagation not implemented')
+  get preventDefault(): () => void {
+    return undefined as any
+  }
+  get stopImmediatePropagation(): () => void {
+    return undefined as any
+  }
+  get stopPropagation(): () => void {
+    return undefined as any
   }
 }

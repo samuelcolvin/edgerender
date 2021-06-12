@@ -42,9 +42,8 @@ describe('handle', () => {
     const event = new FetchEvent('fetch', {request})
     const response = await router.handle(event)
     expect(response.status).toEqual(200)
-    // const text = await response.text()
-    // expect(text).toMatch(/^<!doctype html>\n/)
-    // console.log('response: %o', text)
+    const text = await response.text()
+    expect(text).toMatch(/^<!doctype html>\n/)
   })
 
   test('path', async () => {

@@ -110,3 +110,16 @@ export async function readableStreamAsString(r: ReadableStream): Promise<string>
     }
   }
 }
+
+export async function readableStreamAsBlobParts(r: ReadableStream): Promise<BlobPart[]> {
+  const reader = r.getReader()
+  const parts: BlobPart[] = []
+  while (true) {
+    const {done, value} = await reader.read()
+    if (done) {
+      return parts
+    } else {
+      parts.push(value)
+    }
+  }
+}

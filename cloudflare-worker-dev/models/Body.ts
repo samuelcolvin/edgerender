@@ -1,5 +1,5 @@
 import {decode} from '../utils'
-import {EdgeReadableStream, readableStreamAsString} from './ReadableStream'
+import {EdgeReadableStream, readableStreamAsBlobParts, readableStreamAsString} from './ReadableStream'
 import {EdgeBlob} from './Blob'
 
 const BodyTypes = new Set(['String', 'EdgeBlob', 'EdgeReadableStream', 'ArrayBuffer', 'Null', 'Undefined'])
@@ -74,7 +74,8 @@ export class EdgeBody implements Body {
     } else if (this._body_content instanceof EdgeBlob) {
       return this._body_content
     } else if (this._body_content instanceof EdgeReadableStream) {
-      throw new Error('TODO blob for EdgeReadableStream')
+      const parts = await readableStreamAsBlobParts(this._body_content)
+      throw new EdgeBlob(parts)
     } else {
       return new Blob([])
     }
