@@ -13,7 +13,7 @@ const manifest = {
 
 const kv_namespace = new MockKVNamespace()
 const assets: AssetConfig = {
-  kv_namespace: kv_namespace as any as KVNamespace,
+  kv_namespace,
   content_manifest: JSON.stringify(manifest),
 }
 

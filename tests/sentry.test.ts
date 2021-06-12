@@ -15,7 +15,7 @@ describe('sentry', () => {
     const request = new Request('/', {headers: {accept: '*/*', foo: 'bar'}})
     const event = new EdgeFetchEvent('fetch', {request})
     const error = new Error('broken')
-    sentry.captureException(event as any, error)
+    sentry.captureException(event, error)
     expect(event._wait_until_promises.length).toEqual(1)
     const promise = event._wait_until_promises[0]
     const response = await promise

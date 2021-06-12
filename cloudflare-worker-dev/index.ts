@@ -8,7 +8,7 @@ import {
   EdgeReadableStream,
 } from './models'
 export {MockKVNamespace} from './kv_namespace'
-import {edge_fetch} from './fetch'
+import {stub_edge_fetch} from './fetch'
 
 declare const global: any
 
@@ -19,7 +19,7 @@ export class EdgeEnv extends EdgeEventTarget {
   readonly Headers = EdgeHeaders
   readonly Blob = EdgeBlob
   readonly ReadableStream = EdgeReadableStream
-  readonly fetch = edge_fetch
+  readonly fetch = stub_edge_fetch
 }
 
 export function makeEdgeEnv(extra: Record<string, any> = {}): void {

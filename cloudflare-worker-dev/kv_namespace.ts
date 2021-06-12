@@ -6,21 +6,29 @@ import {encode, decode} from './utils'
 interface InputValue {
   value: string | ArrayBuffer
   metadata?: Record<string, string>
+  expiration?: number
 }
 
 interface InternalValue {
   value: ArrayBuffer
-  metadata?: Record<string, string>
+  metadata?: unknown
+  expiration?: number
 }
 
-interface KvValue {
-  value?: any
-  metadata?: Record<string, string>
+interface OutputValue {
+  value: any
+  metadata: unknown | null
+}
+
+interface ListKey {
+  name: string
+  expiration?: number
+  metadata?: unknown
 }
 
 type ValueTypeNames = 'text' | 'json' | 'arrayBuffer' | 'stream'
 
-export class MockKVNamespace {
+export class MockKVNamespace implements KVNamespace {
   protected kv: Map<string, InternalValue>
 
   constructor(kv: Record<string, InputValue> = {}) {
@@ -28,15 +36,20 @@ export class MockKVNamespace {
     this._reset(kv)
   }
 
-  async get(key: string, type: ValueTypeNames = 'text'): Promise<any> {
-    const v = await this.getWithMetadata(key, type)
+  async get(key: string, options?: {type?: ValueTypeNames; cacheTtl?: number} | ValueTypeNames): Promise<any> {
+    options = options || {}
+    if (typeof options == 'string') {
+      options = {type: options}
+    }
+    const v = await this.getWithMetadata(key, options.type)
     return v.value || null
   }
 
-  async getWithMetadata(key: string, type: ValueTypeNames = 'text'): Promise<KvValue> {
+  async getWithMetadata(key: string, type?: ValueTypeNames): Promise<OutputValue> {
+    // async getWithMetadata(key: string, type: ValueTypeNames = 'text'): Promise<KvValue> {
     const v = this.kv.get(key)
     if (v == undefined) {
-      return {}
+      return {value: null, metadata: null}
     }
     return {value: prepare_value(v.value, type), metadata: v.metadata || {}}
   }
@@ -49,8 +62,29 @@ export class MockKVNamespace {
     this.kv.delete(key)
   }
 
-  async list(): Promise<any[]> {
-    throw new Error('not yet implemented')
+  async list(options?: {prefix?: string; limit?: number; cursor?: string}): Promise<{
+    keys: ListKey[]
+    list_complete: boolean
+    cursor?: string
+  }> {
+    options = options || {}
+    if (options.cursor) {
+      throw new Error('list cursors not yet implemented')
+    }
+
+    const prefix = options.prefix
+    const limit = options.limit || 1000
+    const keys: ListKey[] = []
+    for (const [name, value] of this.kv) {
+      if (!prefix || name.startsWith(prefix)) {
+        if (keys.length == limit) {
+          return {keys, list_complete: false, cursor: 'not-fully-implemented'}
+        }
+        const {expiration, metadata} = value
+        keys.push({name, expiration, metadata})
+      }
+    }
+    return {keys, list_complete: true}
   }
 
   _clear() {
@@ -72,15 +106,15 @@ export class MockKVNamespace {
   }
 }
 
-function prepare_value(v: ArrayBuffer, type: ValueTypeNames): any {
+function prepare_value(v: ArrayBuffer, type: ValueTypeNames | undefined): any {
   switch (type) {
     case 'arrayBuffer':
       return v
     case 'json':
       return JSON.parse(decode(v))
-    case 'text':
-      return decode(v)
     case 'stream':
       return new EdgeReadableStream([new Uint8Array(v)])
+    default:
+      return decode(v)
   }
 }
