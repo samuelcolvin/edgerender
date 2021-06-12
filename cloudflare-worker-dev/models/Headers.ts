@@ -1,13 +1,21 @@
 // stubs https://developer.mozilla.org/en-US/docs/Web/API/Headers
 
-export class Headers {
+export class EdgeHeaders implements Headers {
   protected readonly map: Map<string, string>
 
-  constructor(init: Record<string, string> = {}) {
-    if (init instanceof Headers) {
-      this.map = new Map(init.map)
+  constructor(init: Map<string, string> | Headers | Record<string, string> | string[][] = {}) {
+    if (init instanceof EdgeHeaders) {
+      this.map = new Map(init.entries())
     } else {
-      this.map = new Map(Object.entries(init).map(([k, v]) => [k.toLowerCase(), v]))
+      let a: [string, string][]
+      if (init instanceof Map) {
+        a = [...init.entries()]
+      } else if (Array.isArray(init)) {
+        a = init as [string, string][]
+      } else {
+        a = Object.entries(init)
+      }
+      this.map = new Map(a.map(([k, v]) => [k.toLowerCase(), v]))
     }
   }
 
@@ -24,7 +32,7 @@ export class Headers {
   }
 
   append(name: string, value: string): void {
-    let k = name.toLowerCase()
+    const k = name.toLowerCase()
     if (this.map.has(k)) {
       value = `${this.map.get(k)},${value}`
     }
@@ -35,8 +43,10 @@ export class Headers {
     this.map.delete(name.toLowerCase())
   }
 
-  forEach(callback: (value: string, key: string, map: Map<string, string>) => void): void {
-    this.map.forEach(callback)
+  forEach(callback: (value: string, key: string, parent: Headers) => void, thisArg?: any): void {
+    const cb = (value: string, key: string, map: Map<string, string>): void =>
+      callback(value, key, new EdgeHeaders(map))
+    this.map.forEach(cb, thisArg)
   }
 
   get(name: string): string | null {
@@ -52,22 +62,17 @@ export class Headers {
     this.map.set(name.toLowerCase(), value)
   }
 
-  [Symbol.iterator](): IterableIterator<string> {
-    return this.values()
+  [Symbol.iterator](): IterableIterator<[string, string]> {
+    return this.entries()
   }
 }
 
-export function as_headers(
-  h: Record<string, string> | Headers | undefined,
-  default_headers: Record<string, string> = {},
-): Headers {
-  if (h) {
-    if (h instanceof Headers) {
-      return h
-    } else {
-      return new Headers(h)
-    }
+export function as_headers(h: HeadersInit | undefined, default_headers: Record<string, string> = {}): Headers {
+  if (!h) {
+    return new EdgeHeaders(default_headers)
+  } else if (h instanceof EdgeHeaders) {
+    return h
   } else {
-    return new Headers(default_headers)
+    return new EdgeHeaders(h)
   }
 }

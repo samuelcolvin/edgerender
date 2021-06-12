@@ -1,8 +1,4 @@
-import {FetchEvent} from './FetchEvent'
-
-type EventListener = (event: FetchEvent) => void
-
-export class FetchEventTarget {
+export class EdgeEventTarget implements EventTarget {
   protected readonly listeners: Set<EventListener>
 
   constructor() {
@@ -10,8 +6,24 @@ export class FetchEventTarget {
   }
 
   // TODO: support `opts`
-  addEventListener(type: 'event', listener: EventListener) {
-    this.listeners.add(listener)
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject | null,
+    options?: boolean | AddEventListenerOptions,
+  ): void {
+    if (type != 'fetch') {
+      throw new Error(`only "fetch" events are supported, not "${type}"`)
+    } else if (options) {
+      throw new Error('"options" is not supported for addEventListener')
+    }
+
+    if (listener == null) {
+      return
+    } else if ('handleEvent' in listener) {
+      this.listeners.add(listener.handleEvent)
+    } else {
+      this.listeners.add(listener)
+    }
   }
 
   dispatchEvent(event: FetchEvent): boolean {
@@ -23,11 +35,20 @@ export class FetchEventTarget {
     return true
   }
 
-  removeEventListener(type: 'event', listener: EventListener): void {
-    this.listeners.delete(listener)
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject): void {
+    if (type != 'fetch') {
+      throw new Error(`only "fetch" events are supported, not "${type}"`)
+    }
+    if (listener == null) {
+      return
+    } else if ('handleEvent' in listener) {
+      this.listeners.delete(listener.handleEvent)
+    } else {
+      this.listeners.delete(listener)
+    }
   }
 
-  resetEventListeners() {
+  _resetEventListeners(): void {
     this.listeners.clear()
   }
 }

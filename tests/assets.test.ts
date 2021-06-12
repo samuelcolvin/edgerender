@@ -1,8 +1,8 @@
 import {EdgeRender, Views} from 'edgerender'
 import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
-import {makeCloudflareEnv, MockKVNamespace} from '../cloudflare-worker-dev'
-import {mock_fetch} from './mock'
+import {makeEdgeEnv, MockKVNamespace} from '../cloudflare-worker-dev'
+import {decode} from '../cloudflare-worker-dev/utils'
 
 const manifest = {
   'foobar.png': 'foobar_png',
@@ -26,7 +26,7 @@ let warnings: any[] = []
 
 describe('handle', () => {
   beforeEach(() => {
-    makeCloudflareEnv({fetch: mock_fetch})
+    makeEdgeEnv()
     warnings = []
     kv_namespace._reset({
       foobar_png: {value: 'this is foobar.png'},
@@ -72,13 +72,13 @@ describe('handle', () => {
     expect(response.status).toEqual(200)
     expect(response.headers.get('content-type')).toEqual('text/html')
     const text = await response.text()
-    expect(text).toEqual('<h1>response to example.com</h1>')
+    expect(text).toEqual('<h1>response from example.com</h1>')
 
     const event2 = new FetchEvent('fetch', {request: new Request('/cache-proxy')})
     const response2 = await router.handle(event2)
     expect(response2.status).toEqual(200)
     expect(response2.headers.get('content-type')).toEqual('text/html')
-    expect(await response2.text()).toEqual('<h1>response to example.com</h1>')
+    expect(await response2.text()).toEqual('<h1>response from example.com</h1>')
   })
 
   test('no-kv_namespace', async () => {
@@ -111,7 +111,7 @@ describe('handle', () => {
   test('cached_proxy', async () => {
     const r1 = await router.assets.cached_proxy(new Request('/'), 'https://example.com/')
     expect(r1.status).toEqual(undefined)
-    expect(r1.body).toEqual('<h1>response to example.com</h1>')
+    expect(decode(r1.body as Uint8Array)).toEqual('<h1>response from example.com</h1>')
     expect(r1.mime_type).toEqual('text/html')
 
     await expect(router.assets.cached_proxy(new Request('/'), 'https://missing.com/')).rejects.toThrow(

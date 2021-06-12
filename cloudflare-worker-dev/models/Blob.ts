@@ -1,48 +1,37 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/Blob
-import {ReadableStream} from './ReadableStream'
-import {encode, decode} from '../utils'
+import {EdgeReadableStream} from './ReadableStream'
+import {encode, decode, catUint8Arrays} from '../utils'
 
 type BlobChunkType = ArrayBuffer | Blob | string
 
-export class Blob {
-  protected readonly chunks: BlobChunkType[]
-  protected type: string
+export class EdgeBlob implements Blob {
+  protected readonly chunks: Uint8Array[]
+  readonly type: string
 
   constructor(chunks: BlobChunkType[], options: {type?: string} = {}) {
-    this.chunks = chunks
+    this.chunks = []
+    for (const chunk of chunks) {
+      if (chunk instanceof ArrayBuffer) {
+        this.chunks.push(new Uint8Array(chunk))
+      } else if (chunk instanceof EdgeBlob) {
+        this.chunks.push((chunk as any)._Uint8Array())
+      } else {
+        this.chunks.push(encode(chunk as string))
+      }
+    }
     this.type = options.type || ''
   }
 
   protected _text(): string {
-    let s = ''
-    for (const chunk of this.chunks) {
-      if (chunk instanceof ArrayBuffer) {
-        s += decode(chunk)
-      } else if (chunk instanceof Blob) {
-        s += (chunk as any)._text()
-      } else {
-        s += chunk
-      }
-    }
-    return s
+    return this.chunks.map(decode).join('')
   }
 
   protected _Uint8Array(): Uint8Array {
-    const a: Uint8Array[] = []
-    for (const chunk of this.chunks) {
-      if (chunk instanceof ArrayBuffer) {
-        a.push(new Uint8Array(chunk))
-      } else if (chunk instanceof Blob) {
-        a.push((chunk as any)._Uint8Array())
-      } else {
-        a.push(encode(chunk))
-      }
-    }
-    return s
+    return catUint8Arrays(this.chunks)
   }
 
   get size(): number {
-    return encode(this._text()).length
+    return this._Uint8Array().length
   }
 
   async text(): Promise<string> {
@@ -50,11 +39,11 @@ export class Blob {
   }
 
   async arrayBuffer(): Promise<ArrayBuffer> {
-    return encode(this._text()).buffer
+    return this._Uint8Array().buffer
   }
 
   stream(): ReadableStream {
-    return new ReadableStream(this.chunks)
+    return new EdgeReadableStream(this.chunks) // TODO
   }
 
   slice(start = 0, end: number | undefined = undefined, contentType?: string): Blob {

@@ -1,22 +1,24 @@
+import {decode} from '../utils'
+
 type BasicCallback = () => void
 
-class ReadableStreamDefaultReader {
-  protected readonly stream: ReadableStream
-  protected readonly closed_promise: Promise<void>
+class EdgeReadableStreamDefaultReader<R> implements ReadableStreamDefaultReader {
+  protected readonly stream: EdgeReadableStream<R>
+  protected readonly closed_promise: Promise<undefined>
 
-  constructor(stream: ReadableStream) {
+  constructor(stream: EdgeReadableStream<R>) {
     this.stream = stream
     this.closed_promise = new Promise(resolve => {
-      stream._internal_add_resolver(resolve)
+      ;(stream as any)._add_resolver(() => resolve(undefined))
     })
   }
 
-  get closed(): Promise<void> {
+  get closed(): Promise<undefined> {
     return this.closed_promise
   }
 
-  async read(): Promise<IteratorResult<string>> {
-    return this.stream._internal_read()
+  async read(): Promise<ReadableStreamDefaultReadValueResult<R>> {
+    return (this.stream as any)._read()
   }
 
   async cancel(reason?: any): Promise<void> {
@@ -24,18 +26,22 @@ class ReadableStreamDefaultReader {
   }
 
   releaseLock(): void {
-    this.stream._internal_unlock()
+    ;(this.stream as any)._unlock()
   }
 }
 
-export class ReadableStream {
-  protected locked = false
-  _internal_iterator: IterableIterator<string>
+export class EdgeReadableStream<R = string | Uint8Array> implements ReadableStream {
+  protected _locked = false
+  _internal_iterator: IterableIterator<R>
   protected readonly on_done_resolvers: Set<BasicCallback>
 
-  constructor(chunks: string[]) {
+  constructor(chunks: R[]) {
     this._internal_iterator = chunks[Symbol.iterator]()
     this.on_done_resolvers = new Set()
+  }
+
+  get locked(): boolean {
+    return this._locked
   }
 
   async cancel(_reason?: any): Promise<void> {
@@ -45,31 +51,62 @@ export class ReadableStream {
     })
   }
 
-  getReader({mode}: {mode?: 'byob'} = {}): ReadableStreamDefaultReader {
+  getReader({mode}: {mode?: 'byob'} = {}): ReadableStreamDefaultReader<R> {
     if (mode) {
       throw new TypeError('ReadableStream modes other than default are not supported')
-    } else if (this.locked) {
+    } else if (this._locked) {
       throw new Error('ReadableStream already locked')
     }
-    this.locked = true
-    return new ReadableStreamDefaultReader(this)
+    this._locked = true
+    return new EdgeReadableStreamDefaultReader(this)
   }
 
-  _internal_unlock(): void {
-    this.locked = false
+  pipeThrough<T>(_transform: ReadableWritablePair<T, R>, _options?: StreamPipeOptions): ReadableStream<T> {
+    throw new Error('pipeThrough not et implemented')
   }
 
-  _internal_add_resolver(resolver: BasicCallback): void {
+  pipeTo(_dest: WritableStream<R>, _options?: StreamPipeOptions): Promise<void> {
+    throw new Error('pipeTo not et implemented')
+  }
+
+  tee(): [ReadableStream<R>, ReadableStream<R>] {
+    throw new Error('pipeTo not et implemented')
+  }
+
+  protected _unlock(): void {
+    this._locked = false
+  }
+
+  protected _add_resolver(resolver: BasicCallback): void {
     this.on_done_resolvers.add(resolver)
   }
 
-  async _internal_read(): Promise<IteratorResult<string>> {
+  protected async _read(): Promise<ReadableStreamDefaultReadResult<R>> {
     const result = this._internal_iterator.next()
     if (result.done) {
       for (const resolve of this.on_done_resolvers) {
         resolve()
       }
+      return result
+    } else {
+      return {done: false, value: result.value}
     }
-    return result
+  }
+}
+
+export async function readableStreamAsString(r: ReadableStream): Promise<string> {
+  const reader = r.getReader()
+  let s = ''
+  while (true) {
+    const {done, value} = await reader.read()
+    if (done) {
+      return s
+    } else {
+      if (typeof value == 'string') {
+        s += value
+      } else {
+        s += decode(value)
+      }
+    }
   }
 }

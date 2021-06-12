@@ -1,68 +1,4 @@
-export interface RequestCf {
-  /**
-   * In addition to the properties on the standard Request object,
-   * the cf object contains extra information about the request provided
-   * by Cloudflare's edge.
-   *
-   * Note: Currently, settings in the cf object cannot be accessed in the
-   * playground.
-   */
-  /**
-   *  (e.g. 395747)
-   */
-  asn: number
-  clientAcceptEncoding: string
-  edgeRequestKeepAliveStatus: 0 | 1
-  botManagement?: {
-    score: number
-    staticResource: boolean
-    verifiedBot: boolean
-  }
-  city?: string
-  clientTcpRtt: number
-  clientTrustScore?: number
-  /**
-   * The three-letter airport code of the data center that the request
-   * hit. (e.g. "DFW")
-   */
-  colo: string
-  continent?: string
-  /**
-   * The two-letter country code in the request. This is the same value
-   * as that provided in the CF-IPCountry header. (e.g. "US")
-   */
-  country: string
-  httpProtocol: string
-  latitude?: string
-  longitude?: string
-  /**
-   * DMA metro code from which the request was issued, e.g. "635"
-   */
-  metroCode?: string
-  postalCode?: string
-  /**
-   * e.g. "Texas"
-   */
-  region?: string
-  /**
-   * e.g. "TX"
-   */
-  regionCode?: string
-  /**
-   * e.g. "weight=256;exclusive=1"
-   */
-  requestPriority: string
-  /**
-   * e.g. "America/Chicago"
-   */
-  timezone?: string
-  tlsVersion: string
-  tlsCipher: string
-  tlsClientAuth: Record<string, string>
-  tlsExportedAuthenticator: Record<string, string>
-}
-
-export function example_cf(): RequestCf {
+export function example_cf(): IncomingRequestCfProperties {
   return {
     asn: 9009,
     city: 'New York',
@@ -108,5 +44,5 @@ export function example_cf(): RequestCf {
       serverHandshake: '0f186e19f0a82',
     },
     tlsVersion: 'TLSv1.3',
-  }
+  } as IncomingRequestCfProperties
 }

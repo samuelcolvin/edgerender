@@ -1,20 +1,19 @@
-import {Request} from './Request'
-
-interface FetchEventInit {
-  request: Request
-}
-
-export class FetchEvent {
+export class EdgeFetchEvent implements Partial<FetchEvent> {
   readonly type: 'fetch'
-  request: Request
-  response: Promise<any> | null = null
+  readonly request: Request
+  _response: Response | Promise<Response> | null = null
+  readonly _wait_until_promises: Promise<any>[] = []
 
   constructor(type: 'fetch', init: FetchEventInit) {
     this.type = type
     this.request = init.request
   }
 
-  respondWith(response: any): void {
-    this.response = response
+  respondWith(response: Response | Promise<Response>): void {
+    this._response = response
+  }
+
+  waitUntil(f: any): void {
+    this._wait_until_promises.push(f as Promise<any>)
   }
 }

@@ -1,5 +1,6 @@
 // https://developers.cloudflare.com/workers/runtime-apis/kv
 // TODO ReadableStream, list, expiration
+import {EdgeReadableStream} from './models'
 import {encode, decode} from './utils'
 
 interface InputValue {
@@ -80,6 +81,6 @@ function prepare_value(v: ArrayBuffer, type: ValueTypeNames): any {
     case 'text':
       return decode(v)
     case 'stream':
-      return 'TODO'
+      return new EdgeReadableStream([new Uint8Array(v)])
   }
 }

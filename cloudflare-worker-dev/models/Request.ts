@@ -1,55 +1,44 @@
 // stubs https://developer.mozilla.org/en-US/docs/Web/API/Request
-import {Headers, as_headers} from './Headers'
-import {Body, BodyType} from './Body'
-import {RequestCf, example_cf} from './RequestCf'
+import {as_headers} from './Headers'
+import {EdgeBody} from './Body'
+import {example_cf} from './RequestCf'
 
 const DEFAULT_HEADERS = {
   accept: '*/*',
 }
 
 const MethodStrings = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
-type Method = typeof MethodStrings[number]
+export type Method = typeof MethodStrings[number]
 
-type ModeType = 'cors' | 'no-cors' | 'same-origin' | 'navigate'
-type CredentialsType = 'omit' | 'sane-origin' | 'include'
-type CacheType = 'default' | 'reload' | 'no-cache'
-
-interface RequestInit {
-  method?: Method
-  headers?: Record<string, string> | Headers
-  body?: BodyType
-  mode?: ModeType
-  credentials?: CredentialsType
-  cache?: CacheType
-  redirect?: 'follow' | 'error' | 'manual'
-  referrer?: string
-  integrity?: string
-}
-
-export class Request extends Body {
+export class EdgeRequest extends EdgeBody implements Request {
   readonly url: string
   readonly method: Method
-  readonly mode: ModeType
-  readonly credentials: CredentialsType
-  readonly cache: CacheType
+  readonly mode: RequestMode
+  readonly credentials: RequestCredentials
+  readonly cache: RequestCache
   readonly redirect: 'follow' | 'error' | 'manual'
   readonly referrer: string
-  readonly integrity?: string
+  readonly integrity: string
   readonly headers: Headers
-  readonly cf?: RequestCf
+  readonly cf: IncomingRequestCfProperties
+  readonly destination: RequestDestination = ''
+  readonly isHistoryNavigation = false
+  readonly isReloadNavigation = false
+  readonly keepalive = false
+  readonly referrerPolicy: ReferrerPolicy = ''
 
   constructor(urlOrRequest: string | Request, init: RequestInit = {}) {
-    const method: Method = init.method || 'GET'
+    const method = check_method(init.method)
     if (init.body && (method == 'GET' || method == 'HEAD')) {
       throw new TypeError("Failed to construct 'Request': Request with GET/HEAD method cannot have body.")
     }
     super(init.body)
 
     let url: string
-    if (urlOrRequest instanceof Request) {
+    if (urlOrRequest instanceof EdgeRequest) {
       url = urlOrRequest.url
       init = {
-        body: urlOrRequest._body_content,
+        body: (urlOrRequest as any)._body_content,
         credentials: urlOrRequest.credentials,
         headers: urlOrRequest.headers,
         method: urlOrRequest.method,
@@ -58,7 +47,7 @@ export class Request extends Body {
         ...init,
       }
     } else {
-      url = urlOrRequest || '/'
+      url = (urlOrRequest as string) || '/'
     }
     this.url = 'https://example.com' + url
     this.method = method
@@ -68,10 +57,14 @@ export class Request extends Body {
     // See https://fetch.spec.whatwg.org/#concept-request-credentials-mode
     this.credentials = init.credentials || (this.mode === 'navigate' ? 'include' : 'omit')
     this.redirect = init.redirect || 'follow'
-    this.integrity = init.integrity
+    this.integrity = init.integrity || '-'
     this.cf = example_cf()
 
     this.headers = as_headers(init.headers, DEFAULT_HEADERS)
+  }
+
+  get signal(): AbortSignal {
+    throw new Error('signal not yet implemented')
   }
 
   clone(): Request {
@@ -88,4 +81,17 @@ export class Request extends Body {
       integrity: this.integrity,
     })
   }
+}
+
+const MethodsSet: Set<string> = new Set(MethodStrings)
+
+export function check_method(m?: string): Method {
+  if (m == undefined) {
+    return 'GET'
+  }
+  const method = m.toUpperCase()
+  if (!MethodsSet.has(method)) {
+    throw new TypeError(`"${m}" is not a valid method, should be one of: ${MethodStrings}`)
+  }
+  return method as Method
 }

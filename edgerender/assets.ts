@@ -93,7 +93,7 @@ export class Assets {
     if (this.debug) {
       console.debug(`"${url}" not yet cached, downloading`)
     }
-    // , {method: request.method, headers: Object.fromEntries(request.headers.entries())}
+
     const r = await fetch(url, request)
     if (r.status != 200) {
       throw new HttpError(502, `Error getting "${url}", upstream response: ${r.status}`)
@@ -101,10 +101,7 @@ export class Assets {
     const mime_type: MimeTypes =
       custom_mime_type || (r.headers.get('content-type') as MimeTypes) || MimeTypes.octetStream
 
-    const blob = await r.blob()
-
-    // const body = await blob.text()  // required for dev-server
-    const body = await blob.arrayBuffer()
+    const body = await r.arrayBuffer()
     await this.kv_namespace.put(cache_key, body, {expirationTtl: 3600 * 24 * 30, metadata: {mime_type}})
     return {body, mime_type, headers: this.headers}
   }
