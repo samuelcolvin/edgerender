@@ -1,8 +1,4 @@
-import Request from './models/Request'
-import Response from './models/Response'
-import FetchEvent from './models/FetchEvent'
-import Headers from './models/Headers'
-import FetchEventTarget from './models/FetchEventTarget'
+import {Request, Response, FetchEvent, Headers, FetchEventTarget} from './models'
 export {MockKVNamespace} from './kv_namespace'
 
 declare const global: any

@@ -1,10 +1,10 @@
-import Request from './Request'
+import {Request} from './Request'
 
 interface FetchEventInit {
   request: Request
 }
 
-export default class FetchEvent {
+export class FetchEvent {
   readonly type: 'fetch'
   request: Request
   response: Promise<any> | null = null

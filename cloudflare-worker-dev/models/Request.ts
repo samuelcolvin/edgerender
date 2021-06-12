@@ -1,16 +1,14 @@
 // stubs https://developer.mozilla.org/en-US/docs/Web/API/Request
-import Headers, {as_headers} from './Headers'
-import Body from './Body'
-import Blob from './blob'
+import {Headers, as_headers} from './Headers'
+import {Body, BodyType} from './Body'
 import {RequestCf, example_cf} from './RequestCf'
-import ReadableStream from './ReadableStream'
 
 const DEFAULT_HEADERS = {
   accept: '*/*',
 }
 
 const MethodStrings = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
-export type Method = typeof MethodStrings[number]
+type Method = typeof MethodStrings[number]
 
 type ModeType = 'cors' | 'no-cors' | 'same-origin' | 'navigate'
 type CredentialsType = 'omit' | 'sane-origin' | 'include'
@@ -19,7 +17,7 @@ type CacheType = 'default' | 'reload' | 'no-cache'
 interface RequestInit {
   method?: Method
   headers?: Record<string, string> | Headers
-  body?: string | Blob | ReadableStream
+  body?: BodyType
   mode?: ModeType
   credentials?: CredentialsType
   cache?: CacheType
@@ -28,7 +26,7 @@ interface RequestInit {
   integrity?: string
 }
 
-export default class Request extends Body {
+export class Request extends Body {
   readonly url: string
   readonly method: Method
   readonly mode: ModeType

@@ -1,12 +1,20 @@
-import Blob from './blob'
-import ReadableStream from './ReadableStream'
+import {Blob} from './blob'
+import {ReadableStream} from './ReadableStream'
 
-export default class Body {
-  protected readonly _body_content: string | Blob | ReadableStream | undefined
+const BodyTypes = new Set(['String', 'Blob', 'ReadableStream', 'ArrayBuffer', 'Null', 'Undefined'])
+
+export type BodyType = string | Blob | ReadableStream | ArrayBuffer
+
+export class Body {
+  protected readonly _body_content: string | Blob | ReadableStream | ArrayBuffer | undefined
   protected _bodyUsed: boolean
 
-  constructor(body_content: string | Blob | ReadableStream | undefined | null) {
-    this._body_content = body_content || undefined
+  constructor(body_content: BodyType | undefined) {
+    const body_type = get_type(body_content)
+    if (!BodyTypes.has(body_type)) {
+      throw new TypeError(`Invalid body type "${body_type}", must be one of: Blob, ReadableStream, string, null`)
+    }
+    this._body_content = body_content
     this._bodyUsed = false
   }
 
@@ -56,5 +64,15 @@ export default class Body {
       throw new Error(`Failed to execute "${name}": body is already used`)
     }
     this._bodyUsed = true
+  }
+}
+
+function get_type(obj: any): string {
+  if (obj == null) {
+    return 'Null'
+  } else if (obj == undefined) {
+    return 'Undefined'
+  } else {
+    return Object.getPrototypeOf(obj).constructor.name
   }
 }

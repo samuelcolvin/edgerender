@@ -28,7 +28,7 @@ class ReadableStreamDefaultReader {
   }
 }
 
-export default class ReadableStream {
+export class ReadableStream {
   protected locked = false
   _internal_iterator: IterableIterator<string>
   protected readonly on_done_resolvers: Set<BasicCallback>

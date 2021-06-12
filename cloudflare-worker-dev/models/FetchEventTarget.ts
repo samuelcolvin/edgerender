@@ -1,8 +1,8 @@
-import FetchEvent from './FetchEvent'
+import {FetchEvent} from './FetchEvent'
 
 type EventListener = (event: FetchEvent) => void
 
-export default class FetchEventTarget {
+export class FetchEventTarget {
   protected readonly listeners: Set<EventListener>
 
   constructor() {

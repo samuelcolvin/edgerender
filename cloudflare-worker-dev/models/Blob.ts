@@ -1,10 +1,10 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/Blob
 import {TextEncoder} from 'util'
-import ReadableStream from './ReadableStream'
+import {ReadableStream} from './ReadableStream'
 
 const encoder = new TextEncoder()
 
-export default class Blob {
+export class Blob {
   protected readonly chunks: string[]
   protected type: string
 

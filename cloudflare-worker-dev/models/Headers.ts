@@ -1,6 +1,6 @@
 // stubs https://developer.mozilla.org/en-US/docs/Web/API/Headers
 
-export default class Headers {
+export class Headers {
   protected readonly map: Map<string, string>
 
   constructor(init: Record<string, string> = {}) {
