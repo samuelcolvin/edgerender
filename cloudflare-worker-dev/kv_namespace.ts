@@ -1,6 +1,6 @@
 // https://developers.cloudflare.com/workers/runtime-apis/kv
 // TODO ReadableStream, list, expiration
-import {TextEncoder, TextDecoder} from 'util'
+import {encode, decode} from './utils'
 
 interface InputValue {
   value: string | ArrayBuffer
@@ -18,9 +18,6 @@ interface KvValue {
 }
 
 type ValueTypeNames = 'text' | 'json' | 'arrayBuffer' | 'stream'
-
-const encoder = new TextEncoder()
-const decoder = new TextDecoder()
 
 export class MockKVNamespace {
   protected kv: Map<string, InternalValue>
@@ -68,7 +65,7 @@ export class MockKVNamespace {
 
   private _put(key: string, value: string | ArrayBuffer, metadata: Record<string, string> | undefined): void {
     if (typeof value == 'string') {
-      value = encoder.encode(value).buffer
+      value = encode(value).buffer
     }
     this.kv.set(key, {value, metadata})
   }
@@ -79,9 +76,9 @@ function prepare_value(v: ArrayBuffer, type: ValueTypeNames): any {
     case 'arrayBuffer':
       return v
     case 'json':
-      return JSON.parse(decoder.decode(v))
+      return JSON.parse(decode(v))
     case 'text':
-      return decoder.decode(v)
+      return decode(v)
     case 'stream':
       return 'TODO'
   }

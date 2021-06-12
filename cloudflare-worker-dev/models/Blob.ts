@@ -1,28 +1,56 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/Blob
-import {TextEncoder} from 'util'
 import {ReadableStream} from './ReadableStream'
+import {encode, decode} from '../utils'
 
-const encoder = new TextEncoder()
+type BlobChunkType = ArrayBuffer | Blob | string
 
 export class Blob {
-  protected readonly chunks: string[]
+  protected readonly chunks: BlobChunkType[]
   protected type: string
 
-  constructor(chunks: string[], options: {type?: string} = {}) {
+  constructor(chunks: BlobChunkType[], options: {type?: string} = {}) {
     this.chunks = chunks
     this.type = options.type || ''
   }
 
+  protected _text(): string {
+    let s = ''
+    for (const chunk of this.chunks) {
+      if (chunk instanceof ArrayBuffer) {
+        s += decode(chunk)
+      } else if (chunk instanceof Blob) {
+        s += (chunk as any)._text()
+      } else {
+        s += chunk
+      }
+    }
+    return s
+  }
+
+  protected _Uint8Array(): Uint8Array {
+    const a: Uint8Array[] = []
+    for (const chunk of this.chunks) {
+      if (chunk instanceof ArrayBuffer) {
+        a.push(new Uint8Array(chunk))
+      } else if (chunk instanceof Blob) {
+        a.push((chunk as any)._Uint8Array())
+      } else {
+        a.push(encode(chunk))
+      }
+    }
+    return s
+  }
+
   get size(): number {
-    return encoder.encode(this.chunks.join('')).length
+    return encode(this._text()).length
   }
 
   async text(): Promise<string> {
-    return this.chunks.join('')
+    return this._text()
   }
 
   async arrayBuffer(): Promise<ArrayBuffer> {
-    return encoder.encode(await this.text()).buffer
+    return encode(this._text()).buffer
   }
 
   stream(): ReadableStream {
