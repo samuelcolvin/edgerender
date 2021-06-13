@@ -19,9 +19,9 @@ export const smart_typeof = (obj: any): SmartType => {
   /**
    * Helper to get the type of object, including classes
    */
-  if (obj == null) {
+  if (obj === null) {
     return SmartType.Null
-  } else if (obj == undefined) {
+  } else if (obj === undefined) {
     return SmartType.Undefined
   } else {
     return Object.getPrototypeOf(obj).constructor.name as SmartType

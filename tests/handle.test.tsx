@@ -1,8 +1,6 @@
-import makeServiceWorkerEnv from 'service-worker-mock'
+import {makeEdgeEnv} from 'edge-mock'
 import {edge_render, Views} from 'edgerender'
 import {json_response} from 'edgerender/response'
-
-declare const global: any
 
 let warnings: any[] = []
 
@@ -31,7 +29,7 @@ const router = edge_render({views})
 
 describe('handle', () => {
   beforeEach(() => {
-    Object.assign(global, makeServiceWorkerEnv())
+    makeEdgeEnv()
     warnings = []
     console.warn = (...args) => {
       warnings.push(args)
@@ -46,7 +44,6 @@ describe('handle', () => {
     expect(response.status).toEqual(200)
     const text = await response.text()
     expect(text).toMatch(/^<!doctype html>\n/)
-    // console.log('response: %o', text)
   })
 
   test('path', async () => {

@@ -1,11 +1,8 @@
-import makeServiceWorkerEnv from 'service-worker-mock'
+import {makeEdgeEnv, EdgeKVNamespace} from 'edge-mock'
+import {decode} from 'edge-mock/utils'
 import {EdgeRender, Views} from 'edgerender'
 import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
-
-import {MockKvNamespace, mock_fetch} from './mock'
-
-declare const global: any
 
 const manifest = {
   'foobar.png': 'foobar_png',
@@ -14,9 +11,9 @@ const manifest = {
   'not-in-kv.png': 'not_in_kv_png',
 }
 
-const kv_namespace = new MockKvNamespace()
+const kv_namespace = new EdgeKVNamespace()
 const assets: AssetConfig = {
-  kv_namespace: kv_namespace.as_kv_namespace(),
+  kv_namespace,
   content_manifest: JSON.stringify(manifest),
 }
 
@@ -29,10 +26,10 @@ let warnings: any[] = []
 
 describe('handle', () => {
   beforeEach(() => {
-    Object.assign(global, makeServiceWorkerEnv())
-    global.fetch = mock_fetch
+    makeEdgeEnv()
     warnings = []
-    kv_namespace.set_keys({
+    kv_namespace._clear()
+    kv_namespace._put_many({
       foobar_png: {value: 'this is foobar.png'},
       favicon_ico: {value: 'this is favicon.ico'},
       splat: {value: 'splat'},
@@ -76,13 +73,13 @@ describe('handle', () => {
     expect(response.status).toEqual(200)
     expect(response.headers.get('content-type')).toEqual('text/html')
     const text = await response.text()
-    expect(text).toEqual('<h1>response to example.com</h1>')
+    expect(text).toEqual('<h1>response from example.com</h1>')
 
     const event2 = new FetchEvent('fetch', {request: new Request('/cache-proxy')})
     const response2 = await router.handle(event2)
     expect(response2.status).toEqual(200)
     expect(response2.headers.get('content-type')).toEqual('text/html')
-    expect(await response2.text()).toEqual('<h1>response to example.com</h1>')
+    expect(await response2.text()).toEqual('<h1>response from example.com</h1>')
   })
 
   test('no-kv_namespace', async () => {
@@ -115,7 +112,8 @@ describe('handle', () => {
   test('cached_proxy', async () => {
     const r1 = await router.assets.cached_proxy(new Request('/'), 'https://example.com/')
     expect(r1.status).toEqual(undefined)
-    expect(r1.body).toEqual('<h1>response to example.com</h1>')
+    const body = decode(r1.body as any)
+    expect(body).toEqual('<h1>response from example.com</h1>')
     expect(r1.mime_type).toEqual('text/html')
 
     await expect(router.assets.cached_proxy(new Request('/'), 'https://missing.com/')).rejects.toThrow(
