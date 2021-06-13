@@ -10,7 +10,6 @@ describe('sentry', () => {
   test('captureException', async () => {
     const sentry = new Sentry('https://foo@bar.ingest.sentry.io/spam', undefined)
 
-    // let promises: any[] = []
     const request = new Request('/', {headers: {accept: '*/*', foo: 'bar'}})
     const event = new EdgeFetchEvent('fetch', {request})
     const error = new Error('broken')

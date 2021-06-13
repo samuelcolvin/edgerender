@@ -1,11 +1,9 @@
-import {TextDecoder} from 'util'
 import {makeEdgeEnv, EdgeKVNamespace} from 'edge-mock'
-import {readableStreamAsString} from 'edge-mock/models/ReadableStream'
+import {decode} from 'edge-mock/utils'
 import {EdgeRender, Views} from 'edgerender'
 import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
 
-const decoder = new TextDecoder()
 const manifest = {
   'foobar.png': 'foobar_png',
   'favicon.ico': 'favicon_ico',
@@ -30,6 +28,7 @@ describe('handle', () => {
   beforeEach(() => {
     makeEdgeEnv()
     warnings = []
+    kv_namespace._clear()
     kv_namespace._put_many({
       foobar_png: {value: 'this is foobar.png'},
       favicon_ico: {value: 'this is favicon.ico'},
@@ -113,7 +112,7 @@ describe('handle', () => {
   test('cached_proxy', async () => {
     const r1 = await router.assets.cached_proxy(new Request('/'), 'https://example.com/')
     expect(r1.status).toEqual(undefined)
-    const body = await readableStreamAsString(r1.body as any)
+    const body = decode(r1.body as any)
     expect(body).toEqual('<h1>response from example.com</h1>')
     expect(r1.mime_type).toEqual('text/html')
 
