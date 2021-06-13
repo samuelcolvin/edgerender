@@ -54,7 +54,6 @@
     }
   },
   "dependencies": {
-    "@types/node": "^15.12.2",
     "csstype": "^3.0.8",
     "mime": "^2.5.2"
   },
