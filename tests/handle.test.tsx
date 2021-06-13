@@ -1,6 +1,6 @@
+import {makeEdgeEnv} from 'edge-mock'
 import {edge_render, Views} from 'edgerender'
 import {json_response} from 'edgerender/response'
-import {makeEdgeEnv} from '../cloudflare-worker-dev'
 
 let warnings: any[] = []
 

@@ -1276,6 +1276,11 @@ domexception@^2.0.1:
   dependencies:
     webidl-conversions "^5.0.0"
 
+edge-mock@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/edge-mock/-/edge-mock-0.0.3.tgz#f1da29497fef2d0f00f28bc385babb3de36fb997"
+  integrity sha512-7/nYO8xKMup9ADhE0yED8OttgkqI7NUq4kmqMa/ca8OmIoyvWDjpZy2P5R6H1Bik6aSuaMtBQOYcJa2GwmE53Q==
+
 electron-to-chromium@^1.3.723:
   version "1.3.750"
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.750.tgz#7e5ef6f478316b0bd656af5942fe502610e97eaf"

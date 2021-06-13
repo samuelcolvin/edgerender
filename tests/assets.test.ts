@@ -1,9 +1,11 @@
+import {TextDecoder} from 'util'
+import {makeEdgeEnv, EdgeKVNamespace} from 'edge-mock'
+import {readableStreamAsString} from 'edge-mock/models/ReadableStream'
 import {EdgeRender, Views} from 'edgerender'
 import {HttpError, MimeTypes} from 'edgerender/response'
 import {AssetConfig} from 'edgerender/assets'
-import {makeEdgeEnv, MockKVNamespace} from '../cloudflare-worker-dev'
-import {decode} from '../cloudflare-worker-dev/utils'
 
+const decoder = new TextDecoder()
 const manifest = {
   'foobar.png': 'foobar_png',
   'favicon.ico': 'favicon_ico',
@@ -11,7 +13,7 @@ const manifest = {
   'not-in-kv.png': 'not_in_kv_png',
 }
 
-const kv_namespace = new MockKVNamespace()
+const kv_namespace = new EdgeKVNamespace()
 const assets: AssetConfig = {
   kv_namespace,
   content_manifest: JSON.stringify(manifest),
@@ -28,7 +30,7 @@ describe('handle', () => {
   beforeEach(() => {
     makeEdgeEnv()
     warnings = []
-    kv_namespace._reset({
+    kv_namespace._put_many({
       foobar_png: {value: 'this is foobar.png'},
       favicon_ico: {value: 'this is favicon.ico'},
       splat: {value: 'splat'},
@@ -111,7 +113,8 @@ describe('handle', () => {
   test('cached_proxy', async () => {
     const r1 = await router.assets.cached_proxy(new Request('/'), 'https://example.com/')
     expect(r1.status).toEqual(undefined)
-    expect(decode(r1.body as Uint8Array)).toEqual('<h1>response from example.com</h1>')
+    const body = await readableStreamAsString(r1.body as any)
+    expect(body).toEqual('<h1>response from example.com</h1>')
     expect(r1.mime_type).toEqual('text/html')
 
     await expect(router.assets.cached_proxy(new Request('/'), 'https://missing.com/')).rejects.toThrow(

@@ -1,6 +1,5 @@
 import Sentry from 'edgerender/sentry'
-import {makeEdgeEnv} from '../cloudflare-worker-dev'
-import {EdgeFetchEvent} from '../cloudflare-worker-dev/models'
+import {makeEdgeEnv, EdgeFetchEvent} from 'edge-mock'
 
 describe('sentry', () => {
   beforeEach(() => {
