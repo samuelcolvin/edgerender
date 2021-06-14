@@ -84,7 +84,11 @@ export class EdgeRender {
       if (this.sentry) {
         this.sentry.captureException(event, exc)
       }
-      const body = this.show_error_details ? `\nError occurred on the edge:\n\n${exc.message}\n${exc.stack}\n` : 'Edge Server Error'
+
+      const body = this.show_error_details
+        ? `\nError occurred on the edge:\n\n${exc.message}\n${exc.stack}\n`
+        : 'Edge Server Error'
+
       return this.prepare_response({
         body,
         status: 500,
