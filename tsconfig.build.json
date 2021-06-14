@@ -1,18 +1,4 @@
 {
-  "compilerOptions": {
-    "outDir": "dist",
-    "module": "commonjs",
-    "target": "esnext",
-    "lib": ["esnext", "webworker"],
-    "alwaysStrict": true,
-    "strict": true,
-    "preserveConstEnums": true,
-    "moduleResolution": "node",
-    "sourceMap": false,
-    "esModuleInterop": true,
-    "declaration": true,
-    "types": ["@cloudflare/workers-types"]
-  },
-  "include": ["edgerender"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "extends": "./tsconfig.json",
+  "include": ["src"]
 }

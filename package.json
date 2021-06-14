@@ -4,12 +4,22 @@
   "description": "Render at the edge",
   "main": "index.js",
   "types": "index.d.ts",
+  "files": [
+    "*.js",
+    "*.js.map",
+    "*.d.ts",
+    "README.md",
+    "LICENSE",
+    "utils/**/*",
+    "webpack/**/*",
+    "src/**/*"
+  ],
   "scripts": {
-    "tsc": "tsc --build tsconfig.build.json",
-    "build": "rm -rf dist && yarn tsc && cp -r edgerender/webpack dist/ && cp README.md LICENSE package.json dist/",
-    "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
-    "lint": "eslint --max-warnings=0 edgerender && prettier --check '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
-    "test": "jest --config jest.config.js --verbose",
+    "prepublishOnly": "tsc --build tsconfig.build.json",
+    "postpublish": "make clean",
+    "format": "prettier --write  '*.{json,js,toml,ts,tsx}'",
+    "lint": "eslint --max-warnings=0 src tests && prettier --check '**/*.{json,js,toml,ts,tsx}'",
+    "test": "jest --verbose",
     "all": "yarn lint && yarn test"
   },
   "author": "Samuel Colvin",
@@ -52,6 +62,17 @@
         }
       ]
     }
+  },
+  "jest": {
+    "testRegex": "/tests/.*\\.test\\.tsx?$",
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "preset": "ts-jest",
+    "moduleDirectories": [
+      ".",
+      "node_modules"
+    ]
   },
   "dependencies": {
     "csstype": "^3.0.8",

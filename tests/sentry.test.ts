@@ -1,4 +1,4 @@
-import Sentry from 'edgerender/sentry'
+import Sentry from '../src/sentry'
 import {makeEdgeEnv, EdgeFetchEvent} from 'edge-mock'
 
 describe('sentry', () => {

@@ -1,4 +1,4 @@
-import {as_path_view, Method} from 'edgerender/request'
+import {as_path_view, Method} from '../src/request'
 
 const view_func = () => ({body: 'foobar', mime_type: 'text/plain'})
 

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "outDir": "./test-build",
+    "outDir": ".",
     "jsx": "react-jsx",
-    "jsxImportSource": "edgerender",
+    "jsxImportSource": "src",
     "module": "commonjs",
     "target": "esnext",
     "lib": ["esnext", "webworker"],
@@ -12,13 +12,11 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "esModuleInterop": true,
+    "allowJs": true,
+    "declaration": true,
     "baseUrl": ".",
-    "paths": {
-      "edgerender": ["edgerender"],
-      "edgerender/*": ["edgerender/*"]
-    },
     "types": ["@cloudflare/workers-types", "@types/jest", "node"]
   },
-  "include": ["edgerender", "tests"],
+  "include": ["src", "tests"],
   "exclude": ["node_modules", "dist"]
 }

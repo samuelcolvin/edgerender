@@ -1,8 +1,8 @@
 import {makeEdgeEnv, EdgeKVNamespace} from 'edge-mock'
 import {decode} from 'edge-mock/utils'
-import {EdgeRender, Views} from 'edgerender'
-import {HttpError, MimeTypes} from 'edgerender/response'
-import {AssetConfig} from 'edgerender/assets'
+import {EdgeRender, Views} from '../src'
+import {HttpError, MimeTypes} from '../src/response'
+import {AssetConfig} from '../src'
 
 const manifest = {
   'foobar.png': 'foobar_png',
