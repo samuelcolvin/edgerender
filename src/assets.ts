@@ -12,14 +12,14 @@ export interface AssetConfig {
 
 export class Assets {
   protected readonly path: string
-  debug?: boolean
+  protected log?: boolean
   protected readonly prefix: RegExp
   protected readonly manifest: Record<string, string>
   protected readonly kv_namespace?: KVNamespace
   protected readonly security_headers: Record<string, string>
   protected readonly headers: Record<string, string>
 
-  constructor(config: AssetConfig, security_headers: Record<string, string>, debug: boolean) {
+  constructor(config: AssetConfig, security_headers: Record<string, string>, log: boolean) {
     this.path = config.path || '/assets/'
     if (!this.path.startsWith('/') || !this.path.endsWith('/')) {
       throw Error('static path must start and end with "/"')
@@ -32,7 +32,7 @@ export class Assets {
     this.headers = {
       'cache-control': config.cache_control || 'public, max-age=86400',
     }
-    this.debug = debug
+    this.log = log
   }
 
   is_static_path(pathname: string): boolean {
@@ -44,11 +44,7 @@ export class Assets {
     const asset_path = pathname.replace(this.prefix, '')
 
     const content_key: string | undefined = this.manifest[asset_path]
-    if (content_key) {
-      if (this.debug) {
-        console.debug(`static file found path=${pathname} content_key=${content_key}`)
-      }
-    } else {
+    if (!content_key) {
       throw this.not_found_error(pathname)
     }
 
@@ -90,7 +86,7 @@ export class Assets {
         headers: this.headers,
       }
     }
-    if (this.debug) {
+    if (this.log) {
       console.debug(`"${url}" not yet cached, downloading`)
     }
 
