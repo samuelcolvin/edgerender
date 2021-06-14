@@ -14,7 +14,7 @@ describe('sentry', () => {
     const event = new EdgeFetchEvent('fetch', {request})
     const error = new Error('broken')
     sentry.captureException(event, error)
-    expect(event._wait_until_promises.length).toEqual(1)
+    expect(event._wait_until_promises).toHaveLength(1)
     const promise = event._wait_until_promises[0]
     const response = await promise
     expect(response.url).toMatch(/^https:\/\/sentry\.io\/api\/spam\/store\/\?/)

@@ -19,6 +19,6 @@
     },
     "types": ["@cloudflare/workers-types", "@types/jest", "node"]
   },
-  "include": ["edgerender", "cloudflare-worker-dev", "tests"],
+  "include": ["edgerender", "tests"],
   "exclude": ["node_modules", "dist"]
 }

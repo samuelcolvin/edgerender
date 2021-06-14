@@ -50,12 +50,17 @@ describe('handle', () => {
   })
 
   test('favicon.ico', async () => {
-    const event = new FetchEvent('fetch', {request: new Request('/assets/favicon.ico')})
-    const response = await router.handle(event)
-    expect(response.status).toEqual(200)
-    const text = await response.text()
-    expect(text).toEqual('this is favicon.ico')
-    expect(response.headers.get('content-type')).toEqual('image/vnd.microsoft.icon')
+    const request = new Request('/assets/favicon.ico')
+    const event1 = new FetchEvent('fetch', {request})
+    const response1 = await router.handle(event1)
+    expect(response1.status).toEqual(200)
+    expect(await response1.text()).toEqual('this is favicon.ico')
+    expect(response1.headers.get('content-type')).toEqual('image/vnd.microsoft.icon')
+
+    const response2 = await router.handle(new FetchEvent('fetch', {request}))
+    expect(response2.status).toEqual(200)
+    expect(await response2.text()).toEqual('this is favicon.ico')
+    expect(response2.headers.get('content-type')).toEqual('image/vnd.microsoft.icon')
   })
 
   test('thing.not-known-type', async () => {

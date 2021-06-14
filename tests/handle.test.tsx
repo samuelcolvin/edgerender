@@ -105,7 +105,7 @@ describe('handle', () => {
     const response = await router.handle(event)
     expect(response.status).toEqual(500)
     expect(await response.text()).toEqual('Edge Server Error')
-    expect(errors.length).toEqual(1)
+    expect(errors).toHaveLength(1)
     expect(errors[0][0]).toEqual('error handling request:')
   })
 
