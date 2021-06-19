@@ -29,7 +29,7 @@ describe('handle', () => {
     makeEdgeEnv()
     warnings = []
     kv_namespace._clear()
-    kv_namespace._put_many({
+    kv_namespace._putMany({
       foobar_png: {value: 'this is foobar.png'},
       favicon_ico: {value: 'this is favicon.ico'},
       splat: {value: 'splat'},
