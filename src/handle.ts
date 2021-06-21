@@ -9,7 +9,7 @@ export interface RequestContext {
   method: Method
   url: URL
   match: Record<string, string>
-  is_htmx: boolean
+  is_hx_request: boolean
   edge_render: EdgeRender
   assets: Assets
 }
@@ -101,7 +101,7 @@ export class EdgeRender {
     const url = new URL(request.url)
     const {pathname} = url
     const cleaned_path = clean_path(pathname)
-    const is_htmx = request.headers.get('hx-request') == 'true'
+    const is_hx_request = request.headers.get('hx-request') == 'true'
     if (this.log) {
       console.debug(`${request.method} ${cleaned_path}`)
     }
@@ -136,7 +136,7 @@ export class EdgeRender {
         method,
         url,
         match,
-        is_htmx,
+        is_hx_request,
         edge_render: this,
         assets: this.assets,
       }
@@ -159,7 +159,7 @@ export class EdgeRender {
       method,
       url,
       match: {},
-      is_htmx,
+      is_hx_request,
       edge_render: this,
       assets: this.assets,
     })

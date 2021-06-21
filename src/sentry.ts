@@ -1,5 +1,3 @@
-import {as_object} from './utils'
-
 export default class Sentry {
   readonly sentry_key: string
   readonly sentry_app: string
@@ -54,7 +52,7 @@ export default class Sentry {
         request: {
           url: request.url,
           method: request.method,
-          headers: as_object(request.headers),
+          headers: Object.fromEntries(request.headers),
         },
         extra: {},
       },

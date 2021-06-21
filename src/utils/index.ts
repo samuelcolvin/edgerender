@@ -33,12 +33,3 @@ export const smart_typeof = (obj: any): SmartType => {
  * $& means the whole matched string
  */
 export const escape_regex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-interface EntriesIterable {
-  entries: () => IterableIterator<[string, string]>
-}
-
-/*
- * convert Request.headers, URL.searchParams or anything else with a similar `entries()` method to an object
- */
-export const as_object = (headers: EntriesIterable): Record<string, string> => Object.fromEntries(headers.entries())
