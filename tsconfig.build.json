@@ -8,7 +8,7 @@
     "strict": true,
     "preserveConstEnums": true,
     "moduleResolution": "node",
-    "sourceMap": false,
+    "sourceMap": true,
     "esModuleInterop": true,
     "declaration": true,
     "types": ["@cloudflare/workers-types"]
