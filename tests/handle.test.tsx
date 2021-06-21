@@ -1,5 +1,5 @@
 import {makeEdgeEnv} from 'edge-mock'
-import {edge_render, Views} from 'edgerender'
+import {EdgeRender, Views} from 'edgerender'
 import {json_response} from 'edgerender/response'
 
 let warnings: any[] = []
@@ -25,7 +25,7 @@ const views: Views = {
     throw new Error('intentional error')
   },
 }
-const router = edge_render({views})
+const router = new EdgeRender({views})
 
 describe('handle', () => {
   beforeEach(() => {

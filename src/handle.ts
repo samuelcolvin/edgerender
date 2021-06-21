@@ -29,7 +29,8 @@ type Page = (children: JsxChunk, context: RequestContext) => JsxChunk | Promise<
 export interface EdgeRenderConfig {
   views: Views
   page?: Page
-  debug?: boolean
+  log?: boolean
+  show_error_details?: boolean
   sentry_dsn?: string
   sentry_release?: string
   sentry_environment?: string
@@ -37,12 +38,11 @@ export interface EdgeRenderConfig {
   security_headers?: Record<string, string>
 }
 
-export const edge_render = (edge_render_config: EdgeRenderConfig): EdgeRender => new EdgeRender(edge_render_config)
-
 export class EdgeRender {
   readonly views: PathView[]
   readonly page?: Page
-  readonly debug: boolean
+  readonly log: boolean
+  readonly show_error_details: boolean
   readonly sentry?: Sentry
   readonly assets: Assets
   readonly security_headers: Record<string, string>
@@ -50,14 +50,12 @@ export class EdgeRender {
   constructor(config: EdgeRenderConfig) {
     this.views = Object.entries(config.views).map(as_path_view)
     this.page = config.page
-    this.debug = config.debug || false
-    if (this.debug) {
-      console.debug('views:', this.views)
-    }
+    this.log = config.log || false
+    this.show_error_details = config.show_error_details || false
     this.security_headers = config.security_headers || default_security_headers
     const assets_config: AssetConfig = config.assets || {}
     const AssetsClass = assets_config.asset_class || Assets
-    this.assets = new AssetsClass(assets_config, this.security_headers, this.debug)
+    this.assets = new AssetsClass(assets_config, this.security_headers, this.log)
     if (config.sentry_dsn) {
       this.sentry = new Sentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
     }
@@ -86,7 +84,11 @@ export class EdgeRender {
       if (this.sentry) {
         this.sentry.captureException(event, exc)
       }
-      const body = this.debug ? `\nError occurred on the edge:\n\n${exc.message}\n${exc.stack}\n` : 'Edge Server Error'
+
+      const body = this.show_error_details
+        ? `\nError occurred on the edge:\n\n${exc.message}\n${exc.stack}\n`
+        : 'Edge Server Error'
+
       return this.prepare_response({
         body,
         status: 500,
@@ -100,7 +102,7 @@ export class EdgeRender {
     const {pathname} = url
     const cleaned_path = clean_path(pathname)
     const is_htmx = request.headers.get('hx-request') == 'true'
-    if (this.debug) {
+    if (this.log) {
       console.debug(`${request.method} ${cleaned_path}`)
     }
 
