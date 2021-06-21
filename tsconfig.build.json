@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": ".",
     "module": "commonjs",
     "target": "esnext",
     "lib": ["esnext", "webworker"],
@@ -11,8 +11,9 @@
     "sourceMap": false,
     "esModuleInterop": true,
     "declaration": true,
+    "allowJs": true,
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["edgerender"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "exclude": ["node_modules", "tests"]
 }
