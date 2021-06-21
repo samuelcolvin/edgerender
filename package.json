@@ -7,8 +7,8 @@
   "scripts": {
     "prepublishOnly": "tsc -b tsconfig.build.json",
     "postpublish": "make clean",
-    "format": "prettier --write  '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
-    "lint": "eslint --max-warnings=0 edgerender && prettier --check '*.{json,js,toml}' 'edgerender/**/*.{ts,js}' 'tests/**/*.{ts,tsx}'",
+    "format": "prettier --write  '*.{json,js,toml,ts,tsx}'",
+    "lint": "eslint --max-warnings=0 edgerender && prettier --check  '*.{json,js,toml,ts,tsx}'",
     "test": "jest --config jest.config.js --verbose",
     "all": "yarn lint && yarn test"
   },
@@ -55,9 +55,14 @@
   },
   "jest": {
     "testRegex": "/tests/.*\\.test\\.tsx?$",
-    "collectCoverageFrom": ["edgerender/**/*.ts"],
+    "collectCoverageFrom": [
+      "edgerender/**/*.ts"
+    ],
     "preset": "ts-jest",
-    "moduleDirectories": [".", "node_modules"]
+    "moduleDirectories": [
+      ".",
+      "node_modules"
+    ]
   },
   "prettier": {
     "singleQuote": true,
