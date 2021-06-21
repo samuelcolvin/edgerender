@@ -28,7 +28,6 @@ build:
 clean:
 	rm -rf coverage
 	rm -rf utils
-	rm -rf webpack
 	rm -f *.js
 	rm -f *.d.ts
 	rm -f *.js.map

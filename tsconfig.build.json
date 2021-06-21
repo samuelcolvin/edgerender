@@ -11,9 +11,8 @@
     "sourceMap": false,
     "esModuleInterop": true,
     "declaration": true,
-    "allowJs": true,
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["edgerender"],
+  "include": ["src"],
   "exclude": ["node_modules", "tests"]
 }

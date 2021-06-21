@@ -11,14 +11,13 @@
     "README.md",
     "LICENSE",
     "utils/**/*",
-    "webpack/**/*",
-    "edgerender/**/*"
+    "src/**/*"
   ],
   "scripts": {
     "prepublishOnly": "tsc -b tsconfig.build.json",
     "postpublish": "make clean",
     "format": "prettier --write  '*.{json,js,toml,ts,tsx}'",
-    "lint": "eslint --max-warnings=0 edgerender && prettier --check  '*.{json,js,toml,ts,tsx}'",
+    "lint": "eslint --max-warnings=0 src && prettier --check  '*.{json,js,toml,ts,tsx}'",
     "test": "jest --verbose",
     "all": "yarn lint && yarn test"
   },
@@ -66,13 +65,13 @@
   "jest": {
     "testRegex": "/tests/.*\\.test\\.tsx?$",
     "collectCoverageFrom": [
-      "edgerender/**/*.ts"
+      "src/**/*.ts"
     ],
     "preset": "ts-jest",
-    "moduleDirectories": [
-      ".",
-      "node_modules"
-    ]
+    "moduleNameMapper": {
+      "edgerender/(.*)": "<rootDir>/src/$1",
+      "edgerender": "<rootDir>/src"
+    }
   },
   "prettier": {
     "singleQuote": true,
