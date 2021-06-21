@@ -4,12 +4,22 @@
   "description": "Render at the edge",
   "main": "index.js",
   "types": "index.d.ts",
+  "files": [
+    "*.js",
+    "*.js.map",
+    "*.d.ts",
+    "README.md",
+    "LICENSE",
+    "utils/**/*",
+    "webpack/**/*",
+    "edgerender/**/*"
+  ],
   "scripts": {
     "prepublishOnly": "tsc -b tsconfig.build.json",
     "postpublish": "make clean",
     "format": "prettier --write  '*.{json,js,toml,ts,tsx}'",
     "lint": "eslint --max-warnings=0 edgerender && prettier --check  '*.{json,js,toml,ts,tsx}'",
-    "test": "jest --config jest.config.js --verbose",
+    "test": "jest --verbose",
     "all": "yarn lint && yarn test"
   },
   "author": "Samuel Colvin",
