@@ -36,6 +36,8 @@ jobs:
 
     - run: yarn
     - run: yarn lint
+    - run: yarn prepublishOnly
+    - run: npm pack
 
   publish:
     needs:
@@ -52,7 +54,7 @@ jobs:
         node-version: '14.x'
         registry-url: 'https://registry.npmjs.org'
 
-    - run: npm install
+    - run: yarn
     - run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
