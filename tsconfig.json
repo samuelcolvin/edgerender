@@ -10,15 +10,14 @@
     "strict": true,
     "preserveConstEnums": true,
     "moduleResolution": "node",
-    "sourceMap": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
+    "baseUrl": "src",
     "paths": {
-      "edgerender": ["edgerender"],
-      "edgerender/*": ["edgerender/*"]
+      "edgerender": [""],
+      "edgerender/*": ["*"]
     },
     "types": ["@cloudflare/workers-types", "@types/jest", "node"]
   },
-  "include": ["edgerender", "tests"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "tests"],
+  "exclude": ["node_modules"]
 }

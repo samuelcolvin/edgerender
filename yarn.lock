@@ -1302,10 +1302,10 @@ domexception@^2.0.1:
   dependencies:
     webidl-conversions "^5.0.0"
 
-edge-mock@0.0.12:
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/edge-mock/-/edge-mock-0.0.12.tgz#c61fcbd00d3dccc2847e4c8f452e036da051d307"
-  integrity sha512-wZjrbJXx937d31wWK7LSfGahEfE5vN92Xh9T0+slTivGdWefBdfJs/RdbAEEkK0z8ptbj1GAU7OhfovTySeivQ==
+edge-mock@0.0.13:
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/edge-mock/-/edge-mock-0.0.13.tgz#cfc8e061a7a40d92d540eca0b178aa9e4cd180b5"
+  integrity sha512-PNFrcqQ8SuIgRS2tTaJ36ldyNYIrNPZDjzD2Cedbkn3zEr8/IrjNRLMHOxJ0mWyMTf+RME6l45ox5f+jY7xNTg==
   dependencies:
     "@cloudflare/workers-types" "^2.2.2"
     express "^4.17.1"
