@@ -1,15 +1,24 @@
-export default class Sentry {
-  readonly sentry_key: string
-  readonly sentry_app: string
+export function setupSentry(dsn: string, environment?: string, release?: string): Sentry | undefined {
+  const m = dsn.match(/^https:\/\/(.+?)@(.+?)\.ingest\.sentry\.io\/(.+)/)
+  if (m) {
+    const [, key, server, app] = m
+    return new Sentry(key, server, app, environment, release)
+  } else {
+    console.warn('invalid sentry DSN', dsn)
+  }
+}
+
+export class Sentry {
+  readonly key: string
+  readonly server: string
+  readonly app: string
   readonly release?: string
   readonly environment: string
 
-  constructor(dsn: string, environment: string | undefined, release: string | undefined = undefined) {
-    const m = dsn.match(/^https:\/\/(.+?)@(.+?)\.ingest\.sentry\.io\/(.+)/)
-    const [, sentry_key, , sentry_app] = m as RegExpMatchArray
-    this.sentry_key = sentry_key
-    this.sentry_app = sentry_app
-
+  constructor(key: string, server: string, app: string, environment?: string, release?: string) {
+    this.key = key
+    this.server = server
+    this.app = app
     this.environment = environment || 'production'
     this.release = release
   }
@@ -66,14 +75,14 @@ export default class Sentry {
     //   defaults.release = this.release
     // }
     const params = {
-      sentry_key: this.sentry_key,
+      sentry_key: this.key,
       sentry_version: 7,
-      sentry_client: 'cloudflare-worker-custom',
+      sentry_client: 'edgerender; https://github.com/samuelcolvin/edgerender',
     }
     const args = Object.entries(params)
       .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
       .join('&')
-    const sentry_url = `https://sentry.io/api/${this.sentry_app}/store/?${args}`
+    const sentry_url = `https://sentry.io/api/${this.app}/store/?${args}`
 
     return await fetch(sentry_url, {
       method: 'POST',

@@ -1,8 +1,9 @@
 import {HttpError, MimeTypes, default_security_headers, PreResponse} from './response'
-import Sentry from './sentry'
+import {Sentry, setupSentry} from './sentry'
 import {JsxChunk} from './jsx'
 import {Assets, AssetConfig} from './assets'
 import {PathView, Method, as_path_view, clean_path} from './request'
+import {CspRules, addCspHeader} from './csp'
 
 export interface RequestContext {
   request: Request
@@ -36,6 +37,7 @@ export interface EdgeRenderConfig {
   sentry_environment?: string
   assets?: AssetConfig
   security_headers?: Record<string, string>
+  csp?: CspRules
 }
 
 export class EdgeRender {
@@ -57,7 +59,10 @@ export class EdgeRender {
     const AssetsClass = assets_config.asset_class || Assets
     this.assets = new AssetsClass(assets_config, this.security_headers, this.log)
     if (config.sentry_dsn) {
-      this.sentry = new Sentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
+      this.sentry = setupSentry(config.sentry_dsn, config.sentry_environment, config.sentry_release)
+    }
+    if (config.csp) {
+      addCspHeader(this.security_headers, config.csp, this.sentry)
     }
     this.handler = this.handler.bind(this)
   }

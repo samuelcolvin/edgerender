@@ -1,14 +1,21 @@
-import Sentry from 'edgerender/sentry'
+import {setupSentry, Sentry} from 'edgerender/sentry'
 import {makeEdgeEnv, EdgeFetchEvent} from 'edge-mock'
+
+const warnings: any[][] = []
 
 describe('sentry', () => {
   beforeEach(() => {
     makeEdgeEnv()
+    warnings.length = 0
+    console.warn = (...args) => {
+      warnings.push(args)
+    }
     jest.resetModules()
   })
 
   test('captureException', async () => {
-    const sentry = new Sentry('https://foo@bar.ingest.sentry.io/spam', undefined)
+    const sentry = setupSentry('https://foo@bar.ingest.sentry.io/spam', undefined) as Sentry
+    expect(sentry).toBeInstanceOf(Sentry)
 
     const request = new Request('/', {headers: {accept: '*/*', foo: 'bar'}})
     const event = new EdgeFetchEvent('fetch', {request})
@@ -26,5 +33,10 @@ describe('sentry', () => {
       method: 'GET',
       headers: {accept: '*/*', foo: 'bar'},
     })
+  })
+  test('invalid-dsn', async () => {
+    const sentry = setupSentry('foobar', undefined)
+    expect(sentry).toBeUndefined()
+    expect(warnings).toStrictEqual([['invalid sentry DSN', 'foobar']])
   })
 })

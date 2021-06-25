@@ -22,18 +22,18 @@ const views: Views = {
   '/cache-proxy': ({request, assets}) => assets.cached_proxy(request, 'https://example.com/'),
 }
 const router = new EdgeRender({views, assets})
-let warnings: any[] = []
+const warnings: any[][] = []
 
 describe('handle', () => {
   beforeEach(() => {
     makeEdgeEnv()
-    warnings = []
     kv_namespace._clear()
     kv_namespace._putMany({
       foobar_png: {value: 'this is foobar.png'},
       favicon_ico: {value: 'this is favicon.ico'},
       splat: {value: 'splat'},
     })
+    warnings.length = 0
     console.warn = (...args) => {
       warnings.push(args)
     }

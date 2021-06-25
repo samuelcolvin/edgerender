@@ -36,7 +36,7 @@ export class HttpError extends Error {
 
   constructor(status: number, body: string, headers: Record<string, string> | undefined = undefined) {
     if (headers) {
-      super(`HTTP Error ${status}: ${body}, headers=${JSON.stringify(headers || {})}`)
+      super(`HTTP Error ${status}: ${body}, headers=${JSON.stringify(headers)}`)
     } else {
       super(`HTTP Error ${status}: ${body}`)
     }
