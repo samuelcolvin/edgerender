@@ -1,4 +1,4 @@
-import type {Sentry} from 'edgerender/sentry'
+import type {Sentry} from './sentry'
 
 export interface CspRules {
   'default-src'?: string[]
