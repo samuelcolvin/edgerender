@@ -29,7 +29,7 @@ module.exports = {
         generator: {
           filename: 'assets/[name].[hash].css[query]',
         },
-        loader: 'edgerender/webpack/custom-sass-loader',
+        loader: 'edgerender/src/webpack/custom-sass-loader',
       },
       {
         test: /\.(css|png|ico|jpe?g|svg|woff2?|ttf)$/i,
