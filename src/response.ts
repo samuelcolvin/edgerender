@@ -45,12 +45,38 @@ export class HttpError extends Error {
     this.headers = headers || {}
   }
 
-  response(): PreResponse {
+  response(request: Request): PreResponse {
+    if (this.status > 300 && this.status < 400) {
+      const {location} = this.headers
+      if (location && !/^https?:\/\//.test(location)) {
+        const {origin, pathname} = new URL(request.url)
+        let path: string
+        if (location.startsWith('/')) {
+          path = location
+        } else if (location.startsWith('.')) {
+          // special case where double slashes are common
+          if (pathname.endsWith('/') && location.startsWith('./')) {
+            path = `${pathname}${location.slice(2)}`
+          } else {
+            path = `${pathname}${location.slice(1)}`
+          }
+        } else {
+          path = `${pathname}${location}`
+        }
+        this.headers.location = `${origin}${path}`
+      }
+    }
     return {
       body: `${this.status}: ${this.body}`,
       mime_type: MimeTypes.plaintext,
       status: this.status,
       headers: this.headers,
     }
+  }
+}
+
+export class Redirect extends HttpError {
+  constructor(location: string, status: 301 | 302 | 303 | 307 | 308 = 307, body: string | null = null) {
+    super(status, body || `Redirecting to "${location}"`, {location})
   }
 }

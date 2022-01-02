@@ -15,7 +15,7 @@ export interface RequestContext {
   assets: Assets
 }
 
-type ResponseTypes = PreResponse | Response | JsxChunk
+type ResponseTypes = PreResponse | Response | JsxChunk | HttpError
 type ViewReturnType = ResponseTypes | Promise<ResponseTypes>
 export type ViewFunction = (context: RequestContext) => ViewReturnType
 export interface View {
@@ -82,7 +82,7 @@ export class EdgeRender {
       }
     } catch (exc) {
       if (exc instanceof HttpError) {
-        return this.on_http_error(exc)
+        return this.on_http_error(request, exc)
       }
       console.error('error handling request:', request, exc)
       if (this.sentry) {
@@ -153,6 +153,8 @@ export class EdgeRender {
           body: await result.render(),
           mime_type: MimeTypes.html,
         }
+      } else if (result instanceof HttpError) {
+        return result.response(request)
       } else {
         return result
       }
@@ -173,9 +175,9 @@ export class EdgeRender {
     throw new HttpError(404, `Page not found for "${context.url.pathname}"`)
   }
 
-  protected async on_http_error(exc: HttpError): Promise<Response> {
+  protected async on_http_error(request: Request, exc: HttpError): Promise<Response> {
     console.warn(exc.message)
-    return this.prepare_response(exc.response())
+    return this.prepare_response(exc.response(request))
   }
 
   protected prepare_response(r: PreResponse): Response {
