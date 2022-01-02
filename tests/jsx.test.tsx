@@ -162,7 +162,11 @@ const components: ComponentTest[] = [
     expected: '<input>',
   },
   {
-    component: () => <div hxBoost={true}><span hxSwapOob={false}/></div>,
+    component: () => (
+      <div hxBoost={true}>
+        <span hxSwapOob={false} />
+      </div>
+    ),
     expected: '<div hx-boost="true"><span hx-swap-oob="false"></span></div>',
   },
 ]
