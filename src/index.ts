@@ -263,7 +263,7 @@ declare global {
       src?: string
       step?: number | string
       type?: InputType
-      value?: string | ReadonlyArray<string> | number
+      value?: string | ReadonlyArray<string> | number | null
       width?: number | string
     }
 

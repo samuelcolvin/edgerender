@@ -153,6 +153,14 @@ const components: ComponentTest[] = [
     component: () => <span>object: "{{a: 1, b: 2, c: 3}}"</span>,
     expected: '<span>object: "{"a":1,"b":2,"c":3}"</span>',
   },
+  {
+    component: () => <input value={undefined}/>,
+    expected: '<input>',
+  },
+  {
+    component: () => <input value={null}/>,
+    expected: '<input>',
+  },
 ]
 
 describe('render_jsx', () => {

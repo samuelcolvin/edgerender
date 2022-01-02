@@ -121,7 +121,9 @@ function render_attr(name: string, value: any): string {
   let attr_value: string | null = null
   const value_type = smart_typeof(value)
 
-  if (name == 'style') {
+  if (value == null) {
+    attr_value = null
+  } else if (name == 'style') {
     attr_value = render_styles(value)
   } else if (name == 'className') {
     attr_value = render_class(value, value_type)
@@ -136,6 +138,7 @@ function render_attr(name: string, value: any): string {
   } else {
     attr_value = render_attr_value(value, value_type)
   }
+
   if (attr_value == null) {
     return ''
   } else {
