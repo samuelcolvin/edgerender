@@ -1,6 +1,7 @@
 const path = require('path')
 
 module.exports = {
+  entry: './src/index.ts',
   output: {
     filename: 'worker.js',
     path: path.resolve('.', 'dist'),
@@ -29,11 +30,19 @@ module.exports = {
         generator: {
           filename: 'assets/[name].[hash].css[query]',
         },
-        loader: 'edgerender/src/webpack/custom-sass-loader',
+        loader: path.join(__dirname, 'custom-sass-loader'),
       },
       {
         test: /\.(css|png|ico|jpe?g|svg|woff2?|ttf)$/i,
         type: 'asset/resource',
+      },
+      {
+        test: /\.(mjs|browser\.js)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[base]?v=[hash]',
+        },
+        loader: 'uglify-loader',
       },
     ],
   },

@@ -117,6 +117,9 @@ describe('handle', () => {
     const text = await response.text()
     expect(text).toEqual('404: static asset "/assets/foobar.png" not found')
     expect(response.headers.get('content-type')).toEqual('text/plain')
-    expect(warnings).toStrictEqual([['HTTP Error 404: static asset "/assets/foobar.png" not found']])
+    expect(warnings).toStrictEqual([
+      ['KV namespace not defined, static assets not available'],
+      ['HTTP Error 404: static asset "/assets/foobar.png" not found']]
+    )
   })
 })

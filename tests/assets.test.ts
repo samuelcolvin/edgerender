@@ -6,7 +6,7 @@ import {AssetConfig} from 'edgerender/assets'
 
 const manifest = {
   'foobar.png': 'foobar_png',
-  'favicon.ico': 'favicon_ico',
+  'favicon.ico': 'favicon.kvkey.ico',
   'thing.not-known-type': 'splat',
   'not-in-kv.png': 'not_in_kv_png',
 }
@@ -22,7 +22,7 @@ const views: Views = {
   '/cache-proxy': ({request, assets}) => assets.cached_proxy(request, 'https://example.com/'),
 }
 const router = new EdgeRender({views, assets})
-const warnings: any[][] = []
+const warnings: string[] = []
 
 describe('handle', () => {
   beforeEach(() => {
@@ -30,12 +30,12 @@ describe('handle', () => {
     kv_namespace._clear()
     kv_namespace._putMany({
       foobar_png: {value: 'this is foobar.png'},
-      favicon_ico: {value: 'this is favicon.ico'},
+      'favicon.kvkey.ico': {value: 'this is favicon.ico'},
       splat: {value: 'splat'},
     })
     warnings.length = 0
     console.warn = (...args) => {
-      warnings.push(args)
+      warnings.push(args.join(' '))
     }
     jest.resetModules()
   })
@@ -98,8 +98,36 @@ describe('handle', () => {
     expect(response.status).toEqual(404)
     expect(await response.text()).toEqual('404: static asset "/assets/favicon.ico" not found')
     expect(warnings).toStrictEqual([
-      ['KV namespace not defined, static assets not available'],
-      ['HTTP Error 404: static asset "/assets/favicon.ico" not found'],
+      'KV namespace not defined, static assets not available',
+      'HTTP Error 404: static asset "/assets/favicon.ico" not found',
+    ])
+  })
+
+  test('no-manifest', async () => {
+    const assets: AssetConfig = {kv_namespace}
+
+    const views: Views = {'/': () => ({body: 'index', mime_type: MimeTypes.plaintext})}
+    const router = new EdgeRender({views, assets})
+
+    const event = new FetchEvent('fetch', {request: new Request('/assets/favicon.kvkey.ico')})
+    const response = await router.handle(event)
+    expect(response.status).toEqual(200)
+    expect(response.headers.get('content-type')).toEqual('image/vnd.microsoft.icon')
+    expect(await response.text()).toEqual('this is favicon.ico')
+  })
+
+  test('no-manifest-404', async () => {
+    const assets: AssetConfig = {kv_namespace}
+
+    const views: Views = {'/': () => ({body: 'index', mime_type: MimeTypes.plaintext})}
+    const router = new EdgeRender({views, assets})
+
+    const event = new FetchEvent('fetch', {request: new Request('/assets/foobar')})
+    const response = await router.handle(event)
+    expect(response.status).toEqual(404)
+    expect(await response.text()).toEqual('404: static asset "/assets/foobar" not found')
+    expect(warnings).toStrictEqual([
+      'HTTP Error 404: static asset "/assets/foobar" not found',
     ])
   })
 
@@ -127,17 +155,17 @@ describe('handle', () => {
   })
 
   test('not-in-kv.png', async () => {
-    const errors: any[] = []
+    const errors: string[] = []
     console.error = (...args) => {
-      errors.push(args)
+      errors.push(args.join(' '))
     }
     const event = new FetchEvent('fetch', {request: new Request('/assets/not-in-kv.png')})
     const response = await router.handle(event)
     expect(response.status).toEqual(404)
     expect(await response.text()).toEqual('404: static asset "/assets/not-in-kv.png" not found')
-    expect(warnings).toStrictEqual([['HTTP Error 404: static asset "/assets/not-in-kv.png" not found']])
+    expect(warnings).toStrictEqual(['HTTP Error 404: static asset "/assets/not-in-kv.png" not found'])
     expect(errors).toStrictEqual([
-      ['content_key "not_in_kv_png" found for asset_path "/assets/not-in-kv.png", but no value in the KV store'],
+      'content_key "not_in_kv_png" found for asset_path "/assets/not-in-kv.png", but no value in the KV store',
     ])
   })
 })

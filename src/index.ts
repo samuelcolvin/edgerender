@@ -128,6 +128,7 @@ declare global {
       hxBoost?: boolean
       hxPushUrl?: 'true'
       hxPrompt?: string
+      hxConfirm?: string
       hxIndicator?: string
     }
 

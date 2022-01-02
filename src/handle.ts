@@ -26,7 +26,6 @@ export type Views = Record<string, View | ViewFunction>
 
 type Page = (children: JsxChunk, context: RequestContext) => JsxChunk | Promise<JsxChunk>
 
-// TODO csp
 export interface EdgeRenderConfig {
   views: Views
   page?: Page

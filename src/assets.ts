@@ -3,7 +3,7 @@ import {escape_regex} from './utils'
 import {HttpError, MimeTypes, PreResponse} from './response'
 
 export interface AssetConfig {
-  content_manifest?: string
+  content_manifest?: any
   kv_namespace?: KVNamespace
   path?: string
   cache_control?: string
@@ -14,7 +14,7 @@ export class Assets {
   protected readonly path: string
   protected log: boolean
   protected readonly prefix: RegExp
-  protected readonly manifest: Record<string, string>
+  protected readonly manifest: Record<string, string> | null
   protected readonly kv_namespace?: KVNamespace
   protected readonly security_headers: Record<string, string>
   protected readonly headers: Record<string, string>
@@ -26,7 +26,12 @@ export class Assets {
     }
 
     this.prefix = new RegExp(`^${escape_regex(this.path)}`)
-    this.manifest = JSON.parse(config.content_manifest || '{}')
+    if (typeof config.content_manifest === 'string') {
+      this.manifest = JSON.parse(config.content_manifest)
+    } else {
+      this.manifest = null
+    }
+
     this.kv_namespace = config.kv_namespace
     this.security_headers = security_headers
     this.headers = {
@@ -43,9 +48,14 @@ export class Assets {
     // stripe leading slashes and "assets to match the format in static_manifest
     const asset_path = pathname.replace(this.prefix, '')
 
-    const content_key: string | undefined = this.manifest[asset_path]
-    if (!content_key) {
-      throw this.not_found_error(pathname)
+    let content_key: string | undefined
+    if (this.manifest) {
+      content_key = this.manifest[asset_path]
+      if (!content_key) {
+        throw this.not_found_error(pathname)
+      }
+    } else {
+      content_key = asset_path
     }
 
     if (this.kv_namespace == undefined) {
@@ -55,8 +65,11 @@ export class Assets {
 
     const body = await this.kv_namespace.get(content_key, 'arrayBuffer')
     if (body === null) {
-      // TODO log to sentry
-      console.error(`content_key "${content_key}" found for asset_path "${pathname}", but no value in the KV store`)
+      // if we have a manifest then it's unexpected that the key doesn't exist, otherwise it's just a 404
+      if (this.manifest) {
+        // TODO log to sentry
+        console.error(`content_key "${content_key}" found for asset_path "${pathname}", but no value in the KV store`)
+      }
       throw this.not_found_error(pathname)
     } else {
       return {
