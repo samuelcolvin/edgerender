@@ -1,6 +1,6 @@
 {
   "name": "edgerender",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Render at the edge",
   "main": "index.js",
   "types": "index.d.ts",

@@ -130,7 +130,10 @@ function render_attr(name: string, value: any): string {
   } else if (name == 'data' && value_type == SmartType.Object) {
     return render_data(value as Record<string, any>)
   } else if (value_type == SmartType.Boolean) {
-    if (value === true) {
+    if (name.startsWith('hx')) {
+      // things like hx-boost want the literal value "true" or "false"
+      attr_value = value ? 'true' : 'false'
+    } else if (value === true) {
       return ` ${get_tag_name(name)}`
     } else {
       attr_value = null

@@ -161,6 +161,10 @@ const components: ComponentTest[] = [
     component: () => <input value={null} />,
     expected: '<input>',
   },
+  {
+    component: () => <div hxBoost={true}><span hxSwapOob={false}/></div>,
+    expected: '<div hx-boost="true"><span hx-swap-oob="false"></span></div>',
+  },
 ]
 
 describe('render_jsx', () => {
