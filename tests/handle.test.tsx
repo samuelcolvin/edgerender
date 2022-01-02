@@ -119,7 +119,7 @@ describe('handle', () => {
     expect(response.headers.get('content-type')).toEqual('text/plain')
     expect(warnings).toStrictEqual([
       ['KV namespace not defined, static assets not available'],
-      ['HTTP Error 404: static asset "/assets/foobar.png" not found']]
-    )
+      ['HTTP Error 404: static asset "/assets/foobar.png" not found'],
+    ])
   })
 })

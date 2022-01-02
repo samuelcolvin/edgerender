@@ -7,7 +7,10 @@ export function addCspHeader(headers: Record<string, string>, csp_rules: CspRule
     csp_rules.report_uri = `https://${server}.ingest.sentry.io/api/${app}/security/?sentry_key=${key}`
   }
 
-  headers['content-security-policy'] = Object.entries(csp_rules).map(directiveAsString).filter(v => v).join(' ')
+  headers['content-security-policy'] = Object.entries(csp_rules)
+    .map(directiveAsString)
+    .filter(v => v)
+    .join(' ')
 }
 
 function directiveAsString([k, v]: [k: string, v: string | string[] | boolean]): string | undefined {

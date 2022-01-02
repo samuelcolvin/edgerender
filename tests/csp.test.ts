@@ -36,7 +36,7 @@ describe('CSP', () => {
     expect(response.status).toEqual(200)
     expect(response.headers.get('content-security-policy')).toEqual(
       "default-src 'self'; frame-src 'self' foobar.com; " +
-      "report-uri https://123456.ingest.sentry.io/api/654321/security/?sentry_key=123abc;"
+        'report-uri https://123456.ingest.sentry.io/api/654321/security/?sentry_key=123abc;',
     )
     expect(warnings).toStrictEqual([])
   })
@@ -58,7 +58,7 @@ describe('CSP', () => {
       upgrade_insecure_requests: true,
       sandbox: false,
       script_src: [],
-      style_src: ['foo', 'bar']
+      style_src: ['foo', 'bar'],
     }
     const router = new EdgeRender({views, csp})
     const response = await router.handle(new FetchEvent('fetch', {request: new Request('/')}))
@@ -69,8 +69,6 @@ describe('CSP', () => {
 
   test('invalid-directive', async () => {
     const csp: CspRules = {style_src: 123 as any}
-    expect(() => new EdgeRender({views, csp})).toThrow(
-      TypeError('CSP style-src: Invalid directive value type Number')
-    )
+    expect(() => new EdgeRender({views, csp})).toThrow(TypeError('CSP style-src: Invalid directive value type Number'))
   })
 })

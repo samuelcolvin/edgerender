@@ -16,8 +16,8 @@
   "scripts": {
     "prepublishOnly": "tsc -b tsconfig.build.json",
     "postpublish": "make clean",
-    "format": "prettier --write  '*.{json,js,toml,ts,tsx}'",
-    "lint": "eslint --max-warnings=0 src && prettier --check  '*.{json,js,toml,ts,tsx}'",
+    "format": "prettier --write  '*.{json,js,ts,tsx}' 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
+    "lint": "eslint --max-warnings=0 src && prettier --check  '*.{json,js,ts,tsx}' 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
     "test": "jest --verbose",
     "all": "yarn lint && yarn test"
   },

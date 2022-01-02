@@ -126,9 +126,7 @@ describe('handle', () => {
     const response = await router.handle(event)
     expect(response.status).toEqual(404)
     expect(await response.text()).toEqual('404: static asset "/assets/foobar" not found')
-    expect(warnings).toStrictEqual([
-      'HTTP Error 404: static asset "/assets/foobar" not found',
-    ])
+    expect(warnings).toStrictEqual(['HTTP Error 404: static asset "/assets/foobar" not found'])
   })
 
   test('no-kv_namespace-cached_proxy', async () => {
