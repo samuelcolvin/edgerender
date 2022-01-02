@@ -154,11 +154,11 @@ const components: ComponentTest[] = [
     expected: '<span>object: "{"a":1,"b":2,"c":3}"</span>',
   },
   {
-    component: () => <input value={undefined}/>,
+    component: () => <input value={undefined} />,
     expected: '<input>',
   },
   {
-    component: () => <input value={null}/>,
+    component: () => <input value={null} />,
     expected: '<input>',
   },
 ]

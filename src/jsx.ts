@@ -121,7 +121,7 @@ function render_attr(name: string, value: any): string {
   let attr_value: string | null = null
   const value_type = smart_typeof(value)
 
-  if (value == null) {
+  if (value_type == SmartType.Null || value_type == SmartType.Undefined) {
     attr_value = null
   } else if (name == 'style') {
     attr_value = render_styles(value)
@@ -139,7 +139,7 @@ function render_attr(name: string, value: any): string {
     attr_value = render_attr_value(value, value_type)
   }
 
-  if (attr_value == null) {
+  if (attr_value === null) {
     return ''
   } else {
     const quote = attr_value.includes('"') ? "'" : '"'
