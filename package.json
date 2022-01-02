@@ -83,8 +83,8 @@
     "arrowParens": "avoid"
   },
   "dependencies": {
-    "csstype": "^3.0.8",
-    "mime": "^2.5.2"
+    "csstype": "^3.0.10",
+    "mime": "^3.0.0"
   },
   "peerDependencies": {
     "@cloudflare/workers-types": "^2.2.2",
